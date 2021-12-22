@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <groupId>com.shdata</groupId>
+        <artifactId>shdaf-parent</artifactId>
+        <version>0.1</version>
+        <relativePath/>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>com.shdata</groupId>
+    <artifactId>open-support-platform</artifactId>
+    <version>0.1</version>
+    <name>开放支撑平台</name>
+    <description>Open Support Platform</description>
+
+    <properties>
+        <!-- JDK & 字符编码申明 -->
+        <java.version>1.8</java.version>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <file.encoding>UTF-8</file.encoding>
+
+        <!-- spring boot & spring cloud 版本 -->
+        <spring-boot.version>2.1.16.RELEASE</spring-boot.version>
+        <spring-cloud-alibaba.version>2.0.0.RELEASE</spring-cloud-alibaba.version>
+
+        <jjwt.version>0.11.1</jjwt.version>
+        <jna.version>5.8.0</jna.version>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+        <log4jdbc.version>1.16</log4jdbc.version>
+        <swagger.version>2.9.2</swagger.version>
+        <fastjson.version>1.2.70</fastjson.version>
+        <druid.version>1.1.24</druid.version>
+        <commons-pool2.version>2.5.0</commons-pool2.version>
+        <mapstruct.version>1.3.1.Final</mapstruct.version>
+
+        <curator.version>4.0.1</curator.version>
+        <zookeeper.version>3.4.13</zookeeper.version>
+
+        <!-- POI -->
+        <poi.version>4.1.2</poi.version>
+    </properties>
+
+    <developers>
+        <developer>
+            <id>184</id>
+            <name>xiegj</name>
+            <email>xiegj@shdata.com</email>
+            <timezone>8</timezone>
+        </developer>
+    </developers>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.shdata</groupId>
+            <artifactId>shdaf-core</artifactId>
+            <version>0.1</version>
+            <exclusions>
+                <exclusion>
+                    <artifactId>slf4j-log4j12</artifactId>
+                    <groupId>org.slf4j</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>spring-boot-starter-security</artifactId>
+                    <groupId>org.springframework.boot</groupId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+
+        <dependency>
+            <groupId>com.alibaba.cloud</groupId>
+            <artifactId>spring-cloud-starter-alibaba-nacos-discovery</artifactId>
+            <version>2.1.0.RELEASE</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
+            <version>1.4.199</version>
+        </dependency>
+    </dependencies>
+
+    <!-- 打包 -->
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+            </plugin>
+            <!-- 跳过单元测试 -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <skipTests>true</skipTests>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project>
