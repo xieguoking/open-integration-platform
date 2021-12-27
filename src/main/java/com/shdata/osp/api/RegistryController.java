@@ -1,13 +1,12 @@
 package com.shdata.osp.api;
 
-import com.alibaba.cloud.nacos.NacosDiscoveryProperties;
-import com.alibaba.cloud.nacos.registry.NacosRegistration;
-import org.springframework.beans.BeansException;
+import com.shdata.osp.spi.VirtualServiceRegistry;
+import com.shdata.osp.vs.DubboVirtualService;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.client.discovery.DiscoveryClient;
-import org.springframework.cloud.client.serviceregistry.ServiceRegistry;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.ApplicationContextAware;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -23,35 +22,30 @@ import java.util.List;
  */
 @RestController
 @RequestMapping("/api/")
-public class RegistryController implements ApplicationContextAware {
+@Api("服务自注册")
+public class RegistryController {
 
 
     @Autowired
     private DiscoveryClient discoveryClient;
-
     @Autowired
-    private ServiceRegistry serviceRegistry;
+    private VirtualServiceRegistry virtualServiceRegistry;
 
-    @Autowired
-    private NacosDiscoveryProperties nacosDiscoveryProperties;
 
-    private ApplicationContext context;
+    @GetMapping("app/{name}/{ip}")
+    @ApiOperation("服务注册")
+    public Object registry(@ApiParam("服务名") @PathVariable String name,@ApiParam("IP") @PathVariable(required = false, value = "127.0.0.1") String ip) {
+        DubboVirtualService virtualService = new DubboVirtualService();
+        virtualService.setPackagePrefix("com.shdata");
+        virtualService.setService(name);
+        virtualService.setServiceName(name);
+        virtualService.setIp(ip);
+        virtualService.setServiceType("dubbo");
 
-    @GetMapping("app/{name}")
-    public Object registry(@PathVariable String name) {
-        nacosDiscoveryProperties.setService(name);
-        nacosDiscoveryProperties.getMetadata().put("type", getClass().getName());
-        nacosDiscoveryProperties.setIp("127.0.0.1");
-        nacosDiscoveryProperties.setPort(8848);
-        NacosRegistration registration = new NacosRegistration(nacosDiscoveryProperties, context);
-        serviceRegistry.register(registration);
+        virtualServiceRegistry.register(virtualService);
 
         List<String> services = discoveryClient.getServices();
         return services;
     }
 
-    @Override
-    public void setApplicationContext(ApplicationContext context) throws BeansException {
-        this.context = context;
-    }
 }

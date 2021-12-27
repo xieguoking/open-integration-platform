@@ -17,3 +17,7 @@ spring:
 logging:
   level:
     root: debug
+jwt:
+  header: Authorization
+swagger:
+  enabled: true
