@@ -1,17 +1,17 @@
 package com.shdata.osp.api;
 
+import com.shdata.osp.dto.ServiceConfigDTO;
+import com.shdata.osp.shenyu.nacos.ShenYuNacosCenterServiceRegistry;
 import com.shdata.osp.spi.VirtualServiceRegistry;
 import com.shdata.osp.vs.DubboVirtualService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.cloud.client.discovery.DiscoveryClient;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.List;
 
 /**
@@ -23,18 +23,18 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/")
 @Api("服务自注册")
+@RequiredArgsConstructor
 public class RegistryController {
 
 
-    @Autowired
-    private DiscoveryClient discoveryClient;
-    @Autowired
-    private VirtualServiceRegistry virtualServiceRegistry;
+    private final DiscoveryClient discoveryClient;
+    private final VirtualServiceRegistry virtualServiceRegistry;
+    private final ShenYuNacosCenterServiceRegistry shenYuNacosCenterServiceRegistry;
 
 
     @GetMapping("app/{name}/{ip}")
     @ApiOperation("服务注册")
-    public Object registry(@ApiParam("服务名") @PathVariable String name,@ApiParam("IP") @PathVariable(required = false, value = "127.0.0.1") String ip) {
+    public Object registry(@ApiParam("服务名") @PathVariable String name, @ApiParam("IP") @PathVariable(required = false, value = "127.0.0.1") String ip) {
         DubboVirtualService virtualService = new DubboVirtualService();
         virtualService.setPackagePrefix("com.shdata");
         virtualService.setService(name);
@@ -46,6 +46,24 @@ public class RegistryController {
 
         List<String> services = discoveryClient.getServices();
         return services;
+    }
+
+
+    @PostMapping("serviceConfig")
+    @ApiOperation("服务注册")
+    public Object serviceConfig(@Valid ServiceConfigDTO serviceConfigDTO) {
+        DubboVirtualService virtualService = new DubboVirtualService();
+        virtualService.setPackagePrefix("com.shdata"); //待定
+        virtualService.setService(serviceConfigDTO.getServiceId());
+        virtualService.setServiceName(serviceConfigDTO.getServiceName());
+        virtualService.setIp(serviceConfigDTO.getOspIp());
+        virtualService.setPort(serviceConfigDTO.getOspPort());
+        virtualService.setServiceType(serviceConfigDTO.getServiceType());
+
+        virtualServiceRegistry.register(virtualService);
+        shenYuNacosCenterServiceRegistry.register(serviceConfigDTO);
+//        TODO 持久化落库
+        return serviceConfigDTO;
     }
 
 }

@@ -1,5 +1,6 @@
 package com.shdata.osp;
 
+import com.shdata.osp.shenyu.nacos.ShdataNacosClientRegisterRepository;
 import com.shdata.osp.vs.NacosVirtualServiceRegistry;
 import org.apache.shenyu.register.client.nacos.NacosClientRegisterRepository;
 import org.apache.shenyu.register.common.config.ShenyuRegisterCenterConfig;
@@ -48,9 +49,9 @@ public class OpenSupportPlatform {
      * 初始化Nacos注册中心接入
      */
     @Bean
-    public NacosClientRegisterRepository nacosClientRegisterRepository(ShenyuRegisterCenterConfig shenyuRegisterCenterConfig) {
-        NacosClientRegisterRepository nacosClientRegisterRepository = new NacosClientRegisterRepository();
-        nacosClientRegisterRepository.init(shenyuRegisterCenterConfig);
-        return nacosClientRegisterRepository;
+    public ShdataNacosClientRegisterRepository shdataNacosClientRegisterRepository(ShenyuRegisterCenterConfig shenyuRegisterCenterConfig) {
+        ShdataNacosClientRegisterRepository shdataNacosClientRegisterRepository = new ShdataNacosClientRegisterRepository();
+        shdataNacosClientRegisterRepository.init(shenyuRegisterCenterConfig);
+        return shdataNacosClientRegisterRepository;
     }
 }
