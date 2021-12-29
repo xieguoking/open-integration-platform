@@ -5,7 +5,7 @@ spring:
     nacos:
       discovery:
         server-addr: 127.0.0.1:8848
-        namespace: "shdata"
+        namespace: public
         # group: springboot
         register-enabled: true
   datasource:
@@ -14,9 +14,24 @@ spring:
   application:
     name: osp
 
+dubbo:
+  application:
+    name: dubbo-osp-getaway-2.7.8
+  registry:
+    address: nacos://127.0.0.1:8848
+
+
+
+framework:
+  context:
+    business:
+      enabled: false
+      save-log:
+        enabled: false
+
 logging:
   level:
-    root: debug
+    root: info
 jwt:
   header: Authorization
 swagger:
