@@ -1,10 +1,15 @@
 package com.shdata.osp;
 
 import com.shdata.osp.vs.NacosVirtualServiceRegistry;
+import org.apache.shenyu.register.client.nacos.NacosClientRegisterRepository;
+import org.apache.shenyu.register.common.config.ShenyuRegisterCenterConfig;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration;
 import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 import org.springframework.context.annotation.Bean;
+
+import java.util.Properties;
 
 /**
  * @author xieguojun
@@ -12,9 +17,10 @@ import org.springframework.context.annotation.Bean;
  * @version 1.0
  * @since 1.0
  */
-@SpringBootApplication
+@SpringBootApplication(exclude = {RedisAutoConfiguration.class})
 @EnableDiscoveryClient
 public class OpenSupportPlatform {
+
     public static void main(String[] args) {
         SpringApplication.run(OpenSupportPlatform.class, args);
     }
@@ -22,5 +28,29 @@ public class OpenSupportPlatform {
     @Bean
     public NacosVirtualServiceRegistry nacosVirtualServiceRegistry() {
         return new NacosVirtualServiceRegistry();
+    }
+
+    /**
+     * 注册中心的配置
+     */
+    @Bean
+    public ShenyuRegisterCenterConfig shenyuRegisterCenterConfig() {
+        ShenyuRegisterCenterConfig shenyuRegisterCenterConfig = new ShenyuRegisterCenterConfig();
+        shenyuRegisterCenterConfig.setRegisterType("nacos");
+        shenyuRegisterCenterConfig.setServerLists("127.0.0.1:8848");
+        Properties prop = new Properties();
+        prop.setProperty("nacosNameSpace", ""); //不填这个 初始化会空指针 可以给个空
+        shenyuRegisterCenterConfig.setProps(prop);
+        return shenyuRegisterCenterConfig;
+    }
+
+    /**
+     * 初始化Nacos注册中心接入
+     */
+    @Bean
+    public NacosClientRegisterRepository nacosClientRegisterRepository(ShenyuRegisterCenterConfig shenyuRegisterCenterConfig) {
+        NacosClientRegisterRepository nacosClientRegisterRepository = new NacosClientRegisterRepository();
+        nacosClientRegisterRepository.init(shenyuRegisterCenterConfig);
+        return nacosClientRegisterRepository;
     }
 }
