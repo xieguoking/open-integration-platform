@@ -47,7 +47,7 @@ public class DubboOspPlugin implements OspPlugin {
         //入参
         Map<String, String> map = new HashMap<>();
         httpServletRequest.getParameterMap().forEach((key, value) -> {
-            map.put(key, String.join(" ", value));
+            map.put(key, String.join(",", value));
         });
         String body = JSONUtil.toJsonStr(map);
         Map<String, String> paris = transformStrategy.resolve(httpServletRequest);
@@ -55,6 +55,7 @@ public class DubboOspPlugin implements OspPlugin {
         //先手动执行 后续用监听 设置缓存的东西
         dubboRegistryServerSync.getProvider();
         MetaData metaData = dubboRegistryServerSync.getRegistryMetaCache().get(paris.get("interfaceName"));
+
 
         //dubbo-service.com.xxx.xx.UserService 后续还得加版本号 group
         GenericService genericService = genericServiceCache.get(paris.get("interfaceName"));
@@ -73,15 +74,14 @@ public class DubboOspPlugin implements OspPlugin {
 
         Pair<String[], Object[]> pair;
 
-        String parameterTypes = JSONUtil.toJsonStr(metaData.getMethods().get(paris.get("method")).getParameterTypes());
-
+        String parameterTypes = StrUtil.join(",", metaData.getMethods().get(paris.get("method")).getParameterTypes());
         if (StrUtil.isBlank(parameterTypes) || ParamCheckUtils.dubboBodyIsEmpty(body)) {
             pair = new ImmutablePair<>(new String[]{}, new Object[]{});
         } else {
             pair = BodyParamUtils.buildParameters(body, parameterTypes);
         }
 
-        Object object = genericService.$invoke(paris.get("method"), new String[]{"java.lang.String"},new String[]{"ss"});
+        Object object = genericService.$invoke(paris.get("method"), pair.getLeft(), pair.getRight());
         if (Objects.isNull(object)) {
             object = Constants.DUBBO_RPC_RESULT_EMPTY;
         }
