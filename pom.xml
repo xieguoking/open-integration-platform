@@ -11,10 +11,10 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.shdata</groupId>
-    <artifactId>open-support-platform</artifactId>
+    <artifactId>open-integration-platform</artifactId>
     <version>0.1</version>
     <name>开放支撑平台</name>
-    <description>Open Support Platform</description>
+    <description>Open Integration Platform</description>
 
     <properties>
         <!-- JDK & 字符编码申明 -->
