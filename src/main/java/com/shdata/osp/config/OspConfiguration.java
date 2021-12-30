@@ -42,8 +42,8 @@ public class OspConfiguration {
      * 映射
      */
     @Bean
-    public OspHandlerMapping ospHandlerMapping(final OspHandler ospWebHandler) {
-        return new OspHandlerMapping(ospWebHandler);
+    public OspHandlerMapping ospHandlerMapping(OspHandler ospWebHandler, DiscoveryClient discoveryClient) {
+        return new OspHandlerMapping(ospWebHandler,discoveryClient);
     }
 
     /**
