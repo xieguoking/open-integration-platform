@@ -4,8 +4,9 @@ import com.shdata.osp.web.handler.OspHandler;
 import com.shdata.osp.web.handler.OspHandlerAdapter;
 import com.shdata.osp.web.handler.OspHandlerMapping;
 import com.shdata.osp.web.handler.OspWebHandler;
-import com.shdata.osp.web.plugin.DubboOspPlugin;
 import com.shdata.osp.web.plugin.OspPlugin;
+import com.shdata.osp.web.plugin.dubbo.DubboOspPlugin;
+import com.shdata.osp.web.plugin.dubbo.DubboRegistryServerSync;
 import com.shdata.osp.web.strategy.DefaultTransformStrategy;
 import com.shdata.osp.web.strategy.TransformStrategy;
 import org.slf4j.Logger;
@@ -43,7 +44,7 @@ public class OspConfiguration {
      */
     @Bean
     public OspHandlerMapping ospHandlerMapping(OspHandler ospWebHandler, DiscoveryClient discoveryClient) {
-        return new OspHandlerMapping(ospWebHandler,discoveryClient);
+        return new OspHandlerMapping(ospWebHandler, discoveryClient);
     }
 
     /**
@@ -63,8 +64,13 @@ public class OspConfiguration {
      * dubbo 插件类型
      */
     @Bean
-    public DubboOspPlugin dubboOspPlugin() {
-        return new DubboOspPlugin();
+    public DubboOspPlugin dubboOspPlugin(DubboRegistryServerSync dubboRegistryServerSync) {
+        return new DubboOspPlugin(dubboRegistryServerSync);
+    }
+
+    @Bean
+    public DubboRegistryServerSync dubboRegistryServerSync(DiscoveryClient discoveryClient) {
+        return new DubboRegistryServerSync(discoveryClient);
     }
 
     /**

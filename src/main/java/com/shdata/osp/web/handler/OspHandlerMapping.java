@@ -33,7 +33,7 @@ public class OspHandlerMapping extends AbstractHandlerMapping {
         String removePrefixString = StrUtil.removePrefix(var1.getRequestURI(), "/");
         String serviceId = removePrefixString.split("\\/")[0];
 
-        //只接受来存在服务注册中心的适配请求
+        //只接受存在服务注册中心的适配请求
         List<ServiceInstance> serviceInstanceList = discoveryClient.getInstances(serviceId);
         if (serviceInstanceList.isEmpty()) {
             return null;
