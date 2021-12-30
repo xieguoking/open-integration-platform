@@ -1,14 +1,14 @@
 package com.shdata.osp;
 
-import com.shdata.osp.shenyu.nacos.ShdataNacosClientRegisterRepository;
 import com.shdata.osp.vs.NacosVirtualServiceRegistry;
-import org.apache.shenyu.register.client.nacos.NacosClientRegisterRepository;
+import com.shdata.osp.vs.shenyu.nacos.ShdataNacosClientRegisterRepository;
 import org.apache.shenyu.register.common.config.ShenyuRegisterCenterConfig;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration;
 import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 import org.springframework.context.annotation.Bean;
+import org.springframework.web.server.WebFilter;
 
 import java.util.Properties;
 
@@ -54,4 +54,6 @@ public class OpenSupportPlatform {
         shdataNacosClientRegisterRepository.init(shenyuRegisterCenterConfig);
         return shdataNacosClientRegisterRepository;
     }
+
+
 }

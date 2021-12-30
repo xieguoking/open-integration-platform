@@ -1,9 +1,9 @@
 package com.shdata.osp.api;
 
 import com.shdata.osp.dto.ServiceConfigDTO;
-import com.shdata.osp.shenyu.nacos.ShenYuNacosCenterServiceRegistry;
 import com.shdata.osp.spi.VirtualServiceRegistry;
 import com.shdata.osp.vs.DubboVirtualService;
+import com.shdata.osp.vs.shenyu.nacos.ShenYuNacosCenterServiceRegistry;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
@@ -53,12 +53,12 @@ public class RegistryController {
     @ApiOperation("服务注册")
     public Object serviceConfig(@Valid ServiceConfigDTO serviceConfigDTO) {
         DubboVirtualService virtualService = new DubboVirtualService();
-        virtualService.setPackagePrefix("com.shdata"); //待定
         virtualService.setService(serviceConfigDTO.getServiceId());
         virtualService.setServiceName(serviceConfigDTO.getServiceName());
         virtualService.setIp(serviceConfigDTO.getOspIp());
         virtualService.setPort(serviceConfigDTO.getOspPort());
         virtualService.setServiceType(serviceConfigDTO.getServiceType());
+        virtualService.setTransformStrategy(serviceConfigDTO.getTransformStrategy());
 
         virtualServiceRegistry.register(virtualService);
         shenYuNacosCenterServiceRegistry.register(serviceConfigDTO);

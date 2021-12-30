@@ -48,7 +48,7 @@ public class ServiceConfigDTO {
     /**
      * 服务转换策略
      */
-    private String serviceConvStrategy;
+    private String transformStrategy;
 
 
     /**

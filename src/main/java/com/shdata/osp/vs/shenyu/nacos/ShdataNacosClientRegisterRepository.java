@@ -1,4 +1,4 @@
-package com.shdata.osp.shenyu.nacos;
+package com.shdata.osp.vs.shenyu.nacos;
 
 import com.alibaba.nacos.api.config.ConfigFactory;
 import com.alibaba.nacos.api.config.ConfigService;

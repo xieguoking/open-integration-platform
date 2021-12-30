@@ -1,11 +1,10 @@
-package com.shdata.osp.shenyu.nacos;
+package com.shdata.osp.vs.shenyu.nacos;
 
 import com.shdata.osp.dto.ServiceConfigDTO;
-import com.shdata.osp.shenyu.ShenYuCenterServiceRegistry;
+import com.shdata.osp.vs.shenyu.ShenYuCenterServiceRegistry;
 import lombok.RequiredArgsConstructor;
 import org.apache.shenyu.common.enums.RpcTypeEnum;
 import org.apache.shenyu.register.client.api.ShenyuClientRegisterRepository;
-import org.apache.shenyu.register.client.nacos.NacosClientRegisterRepository;
 import org.apache.shenyu.register.common.dto.MetaDataRegisterDTO;
 import org.apache.shenyu.register.common.dto.URIRegisterDTO;
 import org.springframework.beans.BeansException;
@@ -43,7 +42,7 @@ public class ShenYuNacosCenterServiceRegistry implements ShenYuCenterServiceRegi
         metaDataRegisterDTO.setPathDesc(serviceConfigDTO.getServiceDesc());
         //规则匹配shenyu-admin的插件规则，最终会走到SpringCloud网关插件执行
         metaDataRegisterDTO.setRpcType(RpcTypeEnum.SPRING_CLOUD.getName());
-        //skdIP
+        //转发地址IP
         metaDataRegisterDTO.setHost(serviceConfigDTO.getOspIp());
         //端口
         metaDataRegisterDTO.setPort(serviceConfigDTO.getOspPort());
