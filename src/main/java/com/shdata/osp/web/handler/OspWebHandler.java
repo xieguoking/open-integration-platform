@@ -2,9 +2,10 @@ package com.shdata.osp.web.handler;
 
 import cn.hutool.core.lang.Assert;
 import cn.hutool.core.util.StrUtil;
-import com.shdata.osp.vs.DefaultVirtualService;
 import com.shdata.osp.web.plugin.OspPlugin;
-import com.shdata.osp.web.strategy.TransformStrategy;
+import com.shdata.osp.web.plugin.OspPluginChain;
+import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.discovery.DiscoveryClient;
 import org.springframework.web.servlet.ModelAndView;
@@ -14,25 +15,23 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 /**
  * @author wangwj
  * @version 1.0
  * @date 2021/12/29
  */
+@Slf4j
 public class OspWebHandler implements OspHandler {
 
     private DiscoveryClient discoveryClient;
 
-    private Map<String, OspPlugin> plugins;
+    private List<OspPlugin> plugins;
 
-    private Map<String, TransformStrategy> strategies;
 
-    public OspWebHandler(DiscoveryClient discoveryClient, final List<OspPlugin> plugins, final List<TransformStrategy> strategies) {
+    public OspWebHandler(DiscoveryClient discoveryClient, final List<OspPlugin> plugins) {
         this.discoveryClient = discoveryClient;
-        this.plugins = plugins.stream().collect(Collectors.toMap(OspPlugin::named, OspPlugin -> OspPlugin));
-        this.strategies = strategies.stream().collect(Collectors.toMap(TransformStrategy::named, TransformStrategy -> TransformStrategy));
+        this.plugins = plugins;
     }
 
     @Override
@@ -45,13 +44,35 @@ public class OspWebHandler implements OspHandler {
         List<ServiceInstance> serviceInstanceList = discoveryClient.getInstances(serviceId);
         Assert.notEmpty(serviceInstanceList, String.format("[%s],虚拟服务不存在请确认!", serviceId));
 
-        Map<String, String> metadata = serviceInstanceList.stream().findFirst().get().getMetadata();
-        String keyServiceType = metadata.get(DefaultVirtualService.KEY_SERVICE_TYPE);
-        String keyServiceStrategy = metadata.get(DefaultVirtualService.KEY_SERVICE_STRATEGY);
-        Assert.notNull(plugins.get(keyServiceType), String.format("[%s],服务类型插件不存在,请求确认下游服务类型", keyServiceType));
-        Assert.notNull(strategies.get(keyServiceStrategy), String.format("[%s],接受请求处理协议插件不存在,请确认", keyServiceStrategy));
+        Map<String, String> serviceIdMetadata = serviceInstanceList.stream().findFirst().get().getMetadata();
+        httpServletRequest.setAttribute("context", serviceIdMetadata);
 
-        plugins.get(keyServiceType).execute(httpServletRequest, httpServletResponse, strategies.get(keyServiceStrategy));
+        new DefaultOspChain(plugins).execute(httpServletRequest, httpServletResponse);
         return null;
     }
+
+    private static class DefaultOspChain implements OspPluginChain {
+
+        private int index;
+
+        private final List<OspPlugin> plugins;
+
+        public DefaultOspChain(final List<OspPlugin> plugins) {
+            this.plugins = plugins;
+        }
+
+        @SneakyThrows
+        @Override
+        public void execute(final HttpServletRequest httpServletRequest, final HttpServletResponse httpServletResponse) {
+            if (this.index < plugins.size()) {
+                OspPlugin plugin = plugins.get(this.index++);
+                boolean skip = plugin.skip(httpServletRequest);
+                if (skip) {
+                    this.execute(httpServletRequest, httpServletResponse);
+                }
+                plugin.execute(httpServletRequest, httpServletResponse, this);
+            }
+        }
+    }
+
 }

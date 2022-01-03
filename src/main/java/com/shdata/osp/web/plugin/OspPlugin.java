@@ -1,6 +1,5 @@
 package com.shdata.osp.web.plugin;
 
-import com.shdata.osp.web.strategy.TransformStrategy;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -15,11 +14,28 @@ public interface OspPlugin {
      */
     String named();
 
+
+    /**
+     * 排序
+     *
+     * @return
+     */
+    int getOrder();
+
+
+    /**
+     * 是否不执行
+     *
+     * @param httpServletRequest
+     * @return
+     */
+    boolean skip(HttpServletRequest httpServletRequest);
+
     /**
      * 执行
      *
      * @param httpServletRequest
      * @param httpServletResponse
      */
-    void execute(final HttpServletRequest httpServletRequest, final HttpServletResponse httpServletResponse, TransformStrategy transformStrategy) throws IOException;
+    void execute(final HttpServletRequest httpServletRequest, final HttpServletResponse httpServletResponse, OspPluginChain ospPluginChain) throws IOException;
 }

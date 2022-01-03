@@ -1,9 +1,14 @@
-package com.shdata.osp.web.strategy;
+package com.shdata.osp.web.plugin.strategy;
 
 import cn.hutool.core.util.ArrayUtil;
 import cn.hutool.core.util.StrUtil;
+import com.shdata.osp.web.plugin.OspPlugin;
+import com.shdata.osp.web.plugin.OspPluginChain;
+import com.shdata.osp.web.plugin.base.PluginEnum;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -16,21 +21,36 @@ import java.util.stream.Collectors;
  * 默认地址转换策略
  */
 
-public class DefaultTransformStrategy implements TransformStrategy {
+public class DefaultStrategyPlugin implements OspPlugin {
 
     @Override
     public String named() {
-        return "default";
+        return PluginEnum.STRATEGY_DEFAULT.getName();
     }
+
+
+    @Override
+    public int getOrder() {
+        return PluginEnum.STRATEGY_DEFAULT.getOrder();
+    }
+
+    @Override
+    public boolean skip(HttpServletRequest httpServletRequest) {
+        return false;
+    }
+
 
     /**
      * 完整的请求路径/dubbo-service/public/v1/com/shdata/a/b/UserService/add
      *
      * @param httpServletRequest
      */
-    public Map<String, String> resolve(HttpServletRequest httpServletRequest) {
-        return resolveUrlToReferenceRule(httpServletRequest.getRequestURI());
+    @Override
+    public void execute(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, OspPluginChain ospPluginChain) throws IOException {
+        httpServletRequest.setAttribute("strategy_rule_paris", resolveUrlToReferenceRule(httpServletRequest.getRequestURI()));
+        ospPluginChain.execute(httpServletRequest, httpServletResponse);
     }
+
 
     private Map<String, String> resolveUrlToReferenceRule(final String url) {
         String removePrefixString = StrUtil.removePrefix(url, "/");

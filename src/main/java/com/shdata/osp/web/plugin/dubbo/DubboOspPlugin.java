@@ -3,7 +3,9 @@ package com.shdata.osp.web.plugin.dubbo;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONUtil;
 import com.shdata.osp.web.plugin.OspPlugin;
-import com.shdata.osp.web.strategy.TransformStrategy;
+import com.shdata.osp.web.plugin.OspPluginChain;
+import com.shdata.osp.web.plugin.base.BodyParamUtils;
+import com.shdata.osp.web.plugin.base.PluginEnum;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.dubbo.config.ReferenceConfig;
@@ -15,7 +17,6 @@ import org.springframework.http.HttpStatus;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
@@ -38,57 +39,68 @@ public class DubboOspPlugin implements OspPlugin {
 
     @Override
     public String named() {
-        return "dubbo";
+        return PluginEnum.DUBBO.getName();
     }
 
 
     @Override
-    public void execute(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, TransformStrategy transformStrategy) throws IOException {
+    public int getOrder() {
+        return PluginEnum.DUBBO.getOrder();
+    }
+
+    @Override
+    public boolean skip(HttpServletRequest httpServletRequest) {
+        return false;
+    }
+
+    @Override
+    public void execute(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, OspPluginChain ospPluginChain) throws IOException {
         //入参
-        Map<String, String> map = new HashMap<>();
-        httpServletRequest.getParameterMap().forEach((key, value) -> {
-            map.put(key, String.join(",", value));
-        });
-        String body = JSONUtil.toJsonStr(map);
-        Map<String, String> paris = transformStrategy.resolve(httpServletRequest);
+        String body = (String) httpServletRequest.getAttribute("rpc_param");
+        //URL协议
+        Map<String, String> paris = (Map<String, String>) httpServletRequest.getAttribute("strategy_rule_paris");
 
         //先手动执行 后续用监听 设置缓存的东西
-        dubboRegistryServerSync.getProvider();
-        MetaData metaData = dubboRegistryServerSync.getRegistryMetaCache().get(paris.get("interfaceName"));
+        String interfaceName = paris.get("interfaceName");
+        String methodName = paris.get("method");
+        String groupName = paris.get("group");
+        String versionName = paris.get("version");
 
+        MetaData metaData = dubboRegistryServerSync.getRegistryMetaCache()
+                .get(interfaceName) != null ? dubboRegistryServerSync.getRegistryMetaCache().get(interfaceName)
+                : dubboRegistryServerSync.getProvider(interfaceName);
 
-        //dubbo-service.com.xxx.xx.UserService 后续还得加版本号 group
-        GenericService genericService = genericServiceCache.get(paris.get("interfaceName"));
-        //加锁 防止重复初始化
+        GenericService genericService = genericServiceCache.get(interfaceName);
         synchronized (Object.class) {
             if (genericService == null) {
                 ReferenceConfig<GenericService> reference = new ReferenceConfig<>();
-                reference.setInterface(paris.get("interfaceName"));
-                reference.setVersion(paris.get("version"));
+                reference.setInterface(interfaceName);
+                reference.setVersion(versionName);
                 reference.setGeneric(true);
-                reference.setGroup(paris.get("group"));
+                reference.setGroup(groupName);
                 genericService = reference.get();
-                genericServiceCache.put(paris.get("interfaceName"), genericService);
+                genericServiceCache.put(interfaceName, genericService);
             }
         }
 
         Pair<String[], Object[]> pair;
-
-        String parameterTypes = StrUtil.join(",", metaData.getMethods().get(paris.get("method")).getParameterTypes());
+        String parameterTypes = StrUtil.join(",", metaData.getMethods().get(methodName).getParameterTypes());
         if (StrUtil.isBlank(parameterTypes) || ParamCheckUtils.dubboBodyIsEmpty(body)) {
             pair = new ImmutablePair<>(new String[]{}, new Object[]{});
         } else {
             pair = BodyParamUtils.buildParameters(body, parameterTypes);
         }
 
-        Object object = genericService.$invoke(paris.get("method"), pair.getLeft(), pair.getRight());
-        if (Objects.isNull(object)) {
-            object = Constants.DUBBO_RPC_RESULT_EMPTY;
-        }
+        Object object = genericService.$invoke(methodName, pair.getLeft(), pair.getRight());
+
         httpServletResponse.setCharacterEncoding("UTF-8");
         httpServletResponse.setStatus(HttpStatus.OK.value());
         httpServletResponse.setContentType("application/json");
-        httpServletResponse.getWriter().println(JSONUtil.toJsonStr(object));
+        httpServletResponse.getWriter().println(JSONUtil.toJsonStr(Objects.isNull(object) ? Constants.DUBBO_RPC_RESULT_EMPTY : object));
         httpServletResponse.getWriter().flush();
+    }
+
+    private MetaData test() {
+        return new MetaData();
     }
 }

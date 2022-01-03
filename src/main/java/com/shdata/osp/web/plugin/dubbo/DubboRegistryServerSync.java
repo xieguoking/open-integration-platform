@@ -3,16 +3,17 @@ package com.shdata.osp.web.plugin.dubbo;
 import cn.hutool.core.lang.Assert;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.dubbo.common.URL;
 import org.apache.dubbo.common.config.Environment;
 import org.apache.dubbo.common.config.configcenter.DynamicConfiguration;
 import org.apache.dubbo.common.constants.CommonConstants;
 import org.apache.dubbo.metadata.report.identifier.KeyTypeEnum;
 import org.apache.dubbo.metadata.report.identifier.MetadataIdentifier;
-import org.apache.dubbo.registry.NotifyListener;
 import org.apache.dubbo.rpc.model.ApplicationModel;
+import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.discovery.DiscoveryClient;
+import org.springframework.context.event.EventListener;
+import org.springframework.util.StopWatch;
 
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
@@ -26,7 +27,7 @@ import java.util.stream.Collectors;
  */
 
 @Slf4j
-public class DubboRegistryServerSync implements NotifyListener {
+public class DubboRegistryServerSync {
 
     private final DiscoveryClient discoveryClient;
 
@@ -43,7 +44,20 @@ public class DubboRegistryServerSync implements NotifyListener {
     /**
      * 这个后面要换成监听
      */
-    public void getProvider() {
+    public MetaData getProvider(String interfaceName) {
+        initAllService();
+
+        return registryMetaCache.get(interfaceName);
+    }
+
+
+    @EventListener(classes = ApplicationReadyEvent.class)
+    public void startInitCache() {
+        log.info("Init Dubbo meta data Sync Cache...");
+        this.initAllService();
+    }
+
+    private void initAllService() {
         //获取所有服务 dubbo的提供者服务是以providers打头
         List<String> services = discoveryClient.getServices();
         List<String> dubboProviderServices = services.stream().filter(x -> x.startsWith(CommonConstants.PROVIDER)).collect(Collectors.toList());
@@ -66,7 +80,7 @@ public class DubboRegistryServerSync implements NotifyListener {
                     metaData.getApplication());
 
             String config = dynamicConfiguration.getConfig(metadataIdentifier.getUniqueKey(KeyTypeEnum.UNIQUE_KEY), CommonConstants.DUBBO);
-            log.info("[{}]获取配置如下:\r\n" + config, metadataIdentifier.getUniqueKey(KeyTypeEnum.UNIQUE_KEY));
+            log.debug("[{}]获取配置如下:\r\n" + config, metadataIdentifier.getUniqueKey(KeyTypeEnum.UNIQUE_KEY));
             Assert.notBlank(config, String.format("[%s]配置获取失败,请检查!", metadataIdentifier.getUniqueKey(KeyTypeEnum.UNIQUE_KEY)));
 
             try {
@@ -78,11 +92,5 @@ public class DubboRegistryServerSync implements NotifyListener {
             }
             registryMetaCache.put(metaData.getInterfaceName(), metaData);
         }
-    }
-
-
-    @Override
-    public void notify(List<URL> urls) {
-        System.out.println(urls);
     }
 }
