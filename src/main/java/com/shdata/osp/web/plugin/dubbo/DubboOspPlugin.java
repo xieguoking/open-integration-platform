@@ -100,7 +100,4 @@ public class DubboOspPlugin implements OspPlugin {
         httpServletResponse.getWriter().flush();
     }
 
-    private MetaData test() {
-        return new MetaData();
-    }
 }
