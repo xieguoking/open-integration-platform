@@ -5,8 +5,8 @@ import com.shdata.osp.web.handler.OspHandlerAdapter;
 import com.shdata.osp.web.handler.OspHandlerMapping;
 import com.shdata.osp.web.handler.OspWebHandler;
 import com.shdata.osp.web.plugin.OspPlugin;
-import com.shdata.osp.web.plugin.dubbo.DubboOspPlugin;
-import com.shdata.osp.web.plugin.dubbo.DubboRegistryServerSync;
+import com.shdata.osp.web.plugin.dubbo.DubboPlugin;
+import com.shdata.osp.web.plugin.dubbo.meta.DubboRegistryServerSync;
 import com.shdata.osp.web.plugin.param.RpcParamTransformPlugin;
 import com.shdata.osp.web.plugin.strategy.DefaultStrategyPlugin;
 import org.springframework.cloud.client.discovery.DiscoveryClient;
@@ -59,8 +59,8 @@ public class OspConfiguration {
      */
 
     @Bean
-    public DubboOspPlugin dubboOspPlugin(DubboRegistryServerSync dubboRegistryServerSync) {
-        return new DubboOspPlugin(dubboRegistryServerSync);
+    public DubboPlugin dubboOspPlugin(DubboRegistryServerSync dubboRegistryServerSync) {
+        return new DubboPlugin(dubboRegistryServerSync);
     }
 
     @Bean

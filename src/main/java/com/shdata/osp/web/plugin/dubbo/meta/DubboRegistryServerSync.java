@@ -1,4 +1,4 @@
-package com.shdata.osp.web.plugin.dubbo;
+package com.shdata.osp.web.plugin.dubbo.meta;
 
 import cn.hutool.core.lang.Assert;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -84,7 +84,7 @@ public class DubboRegistryServerSync {
 
             try {
                 ObjectMapper objectMapper = new ObjectMapper();
-                DubboSourceConfig dubboSourceConfig = objectMapper.readValue(config, DubboSourceConfig.class);
+                MetaConfig dubboSourceConfig = objectMapper.readValue(config, MetaConfig.class);
                 metaData.setMethods(dubboSourceConfig.getMethods().stream().collect(Collectors.toMap(Methods::getName, Methods -> Methods)));
             } catch (Exception e) {
                 log.error(e.getMessage(), e);

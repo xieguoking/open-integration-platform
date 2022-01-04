@@ -8,6 +8,8 @@ import com.shdata.osp.web.plugin.OspPluginChain;
 import com.shdata.osp.web.plugin.base.BodyParamUtils;
 import com.shdata.osp.web.plugin.base.OspConstants;
 import com.shdata.osp.web.plugin.base.PluginEnum;
+import com.shdata.osp.web.plugin.dubbo.meta.DubboRegistryServerSync;
+import com.shdata.osp.web.plugin.dubbo.meta.MetaData;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.dubbo.config.ReferenceConfig;
@@ -29,13 +31,13 @@ import java.util.concurrent.ConcurrentHashMap;
  * @date 2021/12/29
  */
 
-public class DubboOspPlugin implements OspPlugin {
+public class DubboPlugin implements OspPlugin {
 
     private Map<String, GenericService> genericServiceCache = new ConcurrentHashMap();
 
     private DubboRegistryServerSync dubboRegistryServerSync;
 
-    public DubboOspPlugin(DubboRegistryServerSync dubboRegistryServerSync) {
+    public DubboPlugin(DubboRegistryServerSync dubboRegistryServerSync) {
         this.dubboRegistryServerSync = dubboRegistryServerSync;
     }
 
@@ -101,5 +103,4 @@ public class DubboOspPlugin implements OspPlugin {
         httpServletResponse.getWriter().println(JSONUtil.toJsonStr(Objects.isNull(object) ? Constants.DUBBO_RPC_RESULT_EMPTY : object));
         httpServletResponse.getWriter().flush();
     }
-
 }

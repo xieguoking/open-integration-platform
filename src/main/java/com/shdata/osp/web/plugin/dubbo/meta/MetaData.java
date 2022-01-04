@@ -1,4 +1,4 @@
-package com.shdata.osp.web.plugin.dubbo;
+package com.shdata.osp.web.plugin.dubbo.meta;
 
 import lombok.Getter;
 import lombok.Setter;

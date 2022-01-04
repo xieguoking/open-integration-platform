@@ -1,4 +1,4 @@
-package com.shdata.osp.web.plugin.dubbo;
+package com.shdata.osp.web.plugin.dubbo.meta;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
@@ -14,7 +14,7 @@ import java.util.List;
 
 @NoArgsConstructor
 @Data
-public class DubboSourceConfig {
+public class MetaConfig {
 
     /**
      * parameters : {"side":"provider","release":"2.7.8","methods":"sayHelloUser,sayHello","deprecated":"false","dubbo":"2.0.2","interface":"com.dave.dubbo.provider.api.MessageService_2_7_8","version":"1.0.0","qos.enable":"false","generic":"false","revision":"1.0.0","metadata-type":"remote","application":"dubbo-nacos-provider-2.7.8","dynamic":"true","anyhost":"true"}
