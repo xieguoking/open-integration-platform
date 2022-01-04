@@ -12,11 +12,11 @@ spring:
     driver-class-name: org.h2.Driver
     url: jdbc:h2:mem:test
   application:
-    name: osp
+    name: oip
 
 dubbo:
   application:
-    name: dubbo-osp-getaway-2.7.8
+    name: dubbo-oip-getaway-2.7.8
   registry:
     address: nacos://127.0.0.1:8848
 
