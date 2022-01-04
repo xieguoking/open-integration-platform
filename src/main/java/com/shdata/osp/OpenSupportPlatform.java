@@ -1,14 +1,13 @@
 package com.shdata.osp;
 
+import com.alibaba.cloud.nacos.NacosDiscoveryProperties;
 import com.shdata.osp.vs.NacosVirtualServiceRegistry;
-import com.shdata.osp.vs.shenyu.nacos.ShdataNacosClientRegisterRepository;
 import org.apache.shenyu.register.common.config.ShenyuRegisterCenterConfig;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration;
 import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 import org.springframework.context.annotation.Bean;
-import org.springframework.web.server.WebFilter;
 
 import java.util.Properties;
 
@@ -35,25 +34,13 @@ public class OpenSupportPlatform {
      * 注册中心的配置
      */
     @Bean
-    public ShenyuRegisterCenterConfig shenyuRegisterCenterConfig() {
+    public ShenyuRegisterCenterConfig shenyuRegisterCenterConfig(NacosDiscoveryProperties nacosDiscoveryProperties) {
         ShenyuRegisterCenterConfig shenyuRegisterCenterConfig = new ShenyuRegisterCenterConfig();
         shenyuRegisterCenterConfig.setRegisterType("nacos");
-        shenyuRegisterCenterConfig.setServerLists("127.0.0.1:8848");
+        shenyuRegisterCenterConfig.setServerLists(nacosDiscoveryProperties.getServerAddr());
         Properties prop = new Properties();
-        prop.setProperty("nacosNameSpace", ""); //不填这个 初始化会空指针 可以给个空
+        prop.setProperty("nacosNameSpace", nacosDiscoveryProperties.getNamespace());//必须
         shenyuRegisterCenterConfig.setProps(prop);
         return shenyuRegisterCenterConfig;
     }
-
-    /**
-     * 初始化Nacos注册中心接入
-     */
-    @Bean
-    public ShdataNacosClientRegisterRepository shdataNacosClientRegisterRepository(ShenyuRegisterCenterConfig shenyuRegisterCenterConfig) {
-        ShdataNacosClientRegisterRepository shdataNacosClientRegisterRepository = new ShdataNacosClientRegisterRepository();
-        shdataNacosClientRegisterRepository.init(shenyuRegisterCenterConfig);
-        return shdataNacosClientRegisterRepository;
-    }
-
-
 }

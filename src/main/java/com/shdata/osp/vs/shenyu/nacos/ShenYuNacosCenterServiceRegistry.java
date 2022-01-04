@@ -4,7 +4,8 @@ import com.shdata.osp.dto.ServiceConfigDTO;
 import com.shdata.osp.vs.shenyu.ShenYuCenterServiceRegistry;
 import lombok.RequiredArgsConstructor;
 import org.apache.shenyu.common.enums.RpcTypeEnum;
-import org.apache.shenyu.register.client.api.ShenyuClientRegisterRepository;
+import org.apache.shenyu.register.client.nacos.NacosClientRegisterRepository;
+import org.apache.shenyu.register.common.config.ShenyuRegisterCenterConfig;
 import org.apache.shenyu.register.common.dto.MetaDataRegisterDTO;
 import org.apache.shenyu.register.common.dto.URIRegisterDTO;
 import org.springframework.beans.BeansException;
@@ -25,7 +26,8 @@ import org.springframework.stereotype.Service;
 public class ShenYuNacosCenterServiceRegistry implements ShenYuCenterServiceRegistry, ApplicationContextAware {
 
     private ApplicationContext context;
-    private final ShenyuClientRegisterRepository shenyuClientRegisterRepository;
+    private final ShenyuRegisterCenterConfig shenyuRegisterCenterConfig;
+
 
     @Override
     public void register(final ServiceConfigDTO serviceConfigDTO) {
@@ -52,10 +54,14 @@ public class ShenYuNacosCenterServiceRegistry implements ShenYuCenterServiceRegi
         metaDataRegisterDTO.setRegisterMetaData(false);
 
         URIRegisterDTO urlRegisterDTO = URIRegisterDTO.transForm(metaDataRegisterDTO);
+
+        NacosClientRegisterRepository nacosClientRegisterRepository = new NacosClientRegisterRepository();
+        nacosClientRegisterRepository.init(shenyuRegisterCenterConfig);
+
         //注册服务URL，对应的是nacos 服务发现 和 shenyu admin选择器
-        shenyuClientRegisterRepository.persistURI(urlRegisterDTO);
+        nacosClientRegisterRepository.persistURI(urlRegisterDTO);
         //注册元数据，对应的是nacos 配置文件 和 shenyu admin选择器的规则
-        shenyuClientRegisterRepository.persistInterface(metaDataRegisterDTO);
+        nacosClientRegisterRepository.persistInterface(metaDataRegisterDTO);
     }
 
     @Override

@@ -4,17 +4,18 @@ import com.shdata.osp.web.handler.OspHandler;
 import com.shdata.osp.web.handler.OspHandlerAdapter;
 import com.shdata.osp.web.handler.OspHandlerMapping;
 import com.shdata.osp.web.handler.OspWebHandler;
-import com.shdata.osp.web.plugin.DubboOspPlugin;
 import com.shdata.osp.web.plugin.OspPlugin;
-import com.shdata.osp.web.strategy.DefaultTransformStrategy;
-import com.shdata.osp.web.strategy.TransformStrategy;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.shdata.osp.web.plugin.dubbo.DubboPlugin;
+import com.shdata.osp.web.plugin.dubbo.meta.DubboRegistryServerSync;
+import com.shdata.osp.web.plugin.param.RpcParamTransformPlugin;
+import com.shdata.osp.web.plugin.strategy.DefaultStrategyPlugin;
 import org.springframework.cloud.client.discovery.DiscoveryClient;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @author wangwj
@@ -23,12 +24,6 @@ import java.util.List;
  */
 @Configuration
 public class OspConfiguration {
-
-    /**
-     * logger.
-     */
-    private static final Logger LOG = LoggerFactory.getLogger(OspConfiguration.class);
-
 
     /**
      * 适配器
@@ -42,16 +37,20 @@ public class OspConfiguration {
      * 映射
      */
     @Bean
-    public OspHandlerMapping ospHandlerMapping(final OspHandler ospWebHandler) {
-        return new OspHandlerMapping(ospWebHandler);
+    public OspHandlerMapping ospHandlerMapping(OspHandler ospWebHandler, DiscoveryClient discoveryClient) {
+        return new OspHandlerMapping(ospWebHandler, discoveryClient);
     }
 
     /**
      * 处理器
      */
     @Bean
-    public OspHandler ospWebHandler(final DiscoveryClient discoveryClient, final List<OspPlugin> plugins, final List<TransformStrategy> strategies) {
-        return new OspWebHandler(discoveryClient, plugins, strategies);
+    public OspHandler ospWebHandler(final DiscoveryClient discoveryClient, final List<OspPlugin> plugins) {
+        //排序
+        List<OspPlugin> ospPlugins = plugins.stream()
+                .sorted(Comparator.comparingInt(OspPlugin::getOrder))
+                .collect(Collectors.toList());
+        return new OspWebHandler(discoveryClient, ospPlugins);
     }
 
 
@@ -59,29 +58,23 @@ public class OspConfiguration {
      * ==================================插件类型===============================================================
      */
 
-    /**
-     * dubbo 插件类型
-     */
     @Bean
-    public DubboOspPlugin dubboOspPlugin() {
-        return new DubboOspPlugin();
+    public DubboPlugin dubboOspPlugin(DubboRegistryServerSync dubboRegistryServerSync) {
+        return new DubboPlugin(dubboRegistryServerSync);
     }
 
-    /**
-     * ==================================转换策略===============================================================
-     */
-
-    /**
-     * 默认请求转换策略
-     */
     @Bean
-    public DefaultTransformStrategy defaultTransformStrategy() {
-        return new DefaultTransformStrategy();
+    public DubboRegistryServerSync dubboRegistryServerSync(DiscoveryClient discoveryClient) {
+        return new DubboRegistryServerSync(discoveryClient);
     }
 
-    /**
-     * ==================================end===============================================================
-     */
+    @Bean
+    public RpcParamTransformPlugin rpcParamTransformPlugin() {
+        return new RpcParamTransformPlugin();
+    }
 
-
+    @Bean
+    public DefaultStrategyPlugin defaultStrategyPlugin() {
+        return new DefaultStrategyPlugin();
+    }
 }
