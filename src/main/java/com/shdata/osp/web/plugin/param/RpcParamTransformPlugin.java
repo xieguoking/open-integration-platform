@@ -6,10 +6,16 @@ import com.shdata.osp.web.plugin.OspPlugin;
 import com.shdata.osp.web.plugin.OspPluginChain;
 import com.shdata.osp.web.plugin.base.OspConstants;
 import com.shdata.osp.web.plugin.base.PluginEnum;
+import lombok.SneakyThrows;
+import org.springframework.http.MediaType;
 
+import javax.servlet.ServletInputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -38,38 +44,34 @@ public class RpcParamTransformPlugin implements OspPlugin {
 
     @Override
     public void execute(final HttpServletRequest httpServletRequest, final HttpServletResponse httpServletResponse, final OspPluginChain chain) throws IOException {
+        String mediaType = httpServletRequest.getHeader("Content-Type");
+        if (MediaType.APPLICATION_JSON.toString().equalsIgnoreCase(mediaType)) {
+            body(httpServletRequest);
+        } else {
+            formData(httpServletRequest);
+        }
+        chain.execute(httpServletRequest, httpServletResponse);
+    }
 
+    @SneakyThrows
+    private void body(HttpServletRequest httpServletRequest) {
+        ServletInputStream inputStream = httpServletRequest.getInputStream();
+        InputStreamReader reader = new InputStreamReader(inputStream, StandardCharsets.UTF_8);
+        BufferedReader bfReader = new BufferedReader(reader);
+        StringBuilder sb = new StringBuilder();
+        String line;
+        while ((line = bfReader.readLine()) != null) {
+            sb.append(line);
+        }
+        httpServletRequest.setAttribute(OspConstants.RPC_PARAM_KEY, sb.toString());
+    }
+
+    private void formData(HttpServletRequest httpServletRequest) {
         Map<String, String> map = new HashMap<>();
         httpServletRequest.getParameterMap().forEach((key, value) -> {
             map.put(key, String.join(",", value));
         });
         String body = JSONUtil.toJsonStr(map);
-
         httpServletRequest.setAttribute(OspConstants.RPC_PARAM_KEY, body);
-        chain.execute(httpServletRequest, httpServletResponse);
-
-//        Map<String, String> serviceIdMetadata = (Map<String, String>) httpServletRequest.getAttribute("context");
-//        if (Objects.nonNull(serviceIdMetadata)) {
-//            String mediaType = httpServletRequest.getHeader("Content-Type");
-//            if (MediaType.APPLICATION_JSON.toString().equalsIgnoreCase(mediaType)) {
-//                body(httpServletRequest, chain);
-//            }
-//            if (MediaType.APPLICATION_FORM_URLENCODED.toString().equalsIgnoreCase(mediaType)) {
-//                formData(httpServletRequest, chain);
-//            }
-//            query(httpServletRequest, chain);
-//        }
-//        chain.execute(httpServletRequest, httpServletResponse);
-    }
-
-    private void body(HttpServletRequest httpServletRequest, final OspPluginChain chain) {
-    }
-
-    private void formData(HttpServletRequest httpServletRequest, final OspPluginChain chain) {
-
-    }
-
-    private void query(HttpServletRequest httpServletRequest, final OspPluginChain chain) {
-
     }
 }

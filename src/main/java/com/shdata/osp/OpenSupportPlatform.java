@@ -1,5 +1,6 @@
 package com.shdata.osp;
 
+import com.alibaba.cloud.nacos.NacosDiscoveryProperties;
 import com.shdata.osp.vs.NacosVirtualServiceRegistry;
 import org.apache.shenyu.register.common.config.ShenyuRegisterCenterConfig;
 import org.springframework.boot.SpringApplication;
@@ -33,12 +34,12 @@ public class OpenSupportPlatform {
      * 注册中心的配置
      */
     @Bean
-    public ShenyuRegisterCenterConfig shenyuRegisterCenterConfig() {
+    public ShenyuRegisterCenterConfig shenyuRegisterCenterConfig(NacosDiscoveryProperties nacosDiscoveryProperties) {
         ShenyuRegisterCenterConfig shenyuRegisterCenterConfig = new ShenyuRegisterCenterConfig();
         shenyuRegisterCenterConfig.setRegisterType("nacos");
-        shenyuRegisterCenterConfig.setServerLists("127.0.0.1:8848");
+        shenyuRegisterCenterConfig.setServerLists(nacosDiscoveryProperties.getServerAddr());
         Properties prop = new Properties();
-        prop.setProperty("nacosNameSpace", ""); //不填这个 初始化会空指针 可以给个空
+        prop.setProperty("nacosNameSpace", nacosDiscoveryProperties.getNamespace());//必须
         shenyuRegisterCenterConfig.setProps(prop);
         return shenyuRegisterCenterConfig;
     }
