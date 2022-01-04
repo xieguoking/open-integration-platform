@@ -26,12 +26,12 @@ public class GlobalPlugin implements OspPlugin {
     }
 
     @Override
-    public boolean skip(HttpServletRequest httpServletRequest) {
+    public boolean skip(final HttpServletRequest httpServletRequest) {
         return true;
     }
 
     @Override
-    public void execute(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, OspPluginChain ospPluginChain) throws IOException {
+    public void execute(final HttpServletRequest httpServletRequest,final HttpServletResponse httpServletResponse,final OspPluginChain ospPluginChain) throws IOException {
 
     }
 }

@@ -13,7 +13,6 @@ import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.discovery.DiscoveryClient;
 import org.springframework.context.event.EventListener;
-import org.springframework.util.StopWatch;
 
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
@@ -68,9 +67,9 @@ public class DubboRegistryServerSync {
         for (String k : dubboProviderServices) {
             MetaData metaData = new MetaData();
             ServiceInstance serviceInstance = discoveryClient.getInstances(k).stream().findFirst().get();
-            metaData.setInterfaceName(serviceInstance.getMetadata().getOrDefault("interface", ""));
-            metaData.setVersion(serviceInstance.getMetadata().getOrDefault("version", ""));
-            metaData.setApplication(serviceInstance.getMetadata().getOrDefault("application", ""));
+            metaData.setInterfaceName(serviceInstance.getMetadata().getOrDefault(CommonConstants.INTERFACE_KEY, ""));
+            metaData.setVersion(serviceInstance.getMetadata().getOrDefault(CommonConstants.VERSION_KEY, ""));
+            metaData.setApplication(serviceInstance.getMetadata().getOrDefault(CommonConstants.APPLICATION_KEY, ""));
             //获取元数据
             MetadataIdentifier metadataIdentifier = new MetadataIdentifier(
                     metaData.getInterfaceName(),

@@ -1,8 +1,10 @@
 package com.shdata.osp.web.plugin.param;
 
 import cn.hutool.json.JSONUtil;
+import com.shdata.osp.vs.DefaultVirtualService;
 import com.shdata.osp.web.plugin.OspPlugin;
 import com.shdata.osp.web.plugin.OspPluginChain;
+import com.shdata.osp.web.plugin.base.OspConstants;
 import com.shdata.osp.web.plugin.base.PluginEnum;
 
 import javax.servlet.http.HttpServletRequest;
@@ -30,12 +32,12 @@ public class RpcParamTransformPlugin implements OspPlugin {
     }
 
     @Override
-    public boolean skip(HttpServletRequest httpServletRequest) {
-        return false;
+    public boolean skip(final HttpServletRequest httpServletRequest) {
+        return skip(httpServletRequest, DefaultVirtualService.KEY_SERVICE_TYPE, PluginEnum.DUBBO);
     }
 
     @Override
-    public void execute(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, OspPluginChain chain) throws IOException {
+    public void execute(final HttpServletRequest httpServletRequest, final HttpServletResponse httpServletResponse, final OspPluginChain chain) throws IOException {
 
         Map<String, String> map = new HashMap<>();
         httpServletRequest.getParameterMap().forEach((key, value) -> {
@@ -43,7 +45,7 @@ public class RpcParamTransformPlugin implements OspPlugin {
         });
         String body = JSONUtil.toJsonStr(map);
 
-        httpServletRequest.setAttribute("rpc_param", body);
+        httpServletRequest.setAttribute(OspConstants.RPC_PARAM_KEY, body);
         chain.execute(httpServletRequest, httpServletResponse);
 
 //        Map<String, String> serviceIdMetadata = (Map<String, String>) httpServletRequest.getAttribute("context");

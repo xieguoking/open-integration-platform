@@ -4,6 +4,7 @@ import cn.hutool.core.lang.Assert;
 import cn.hutool.core.util.StrUtil;
 import com.shdata.osp.web.plugin.OspPlugin;
 import com.shdata.osp.web.plugin.OspPluginChain;
+import com.shdata.osp.web.plugin.base.OspConstants;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cloud.client.ServiceInstance;
@@ -45,7 +46,7 @@ public class OspWebHandler implements OspHandler {
         Assert.notEmpty(serviceInstanceList, String.format("[%s],虚拟服务不存在请确认!", serviceId));
 
         Map<String, String> serviceIdMetadata = serviceInstanceList.stream().findFirst().get().getMetadata();
-        httpServletRequest.setAttribute("context", serviceIdMetadata);
+        httpServletRequest.setAttribute(OspConstants.OSP_CONTEXT, serviceIdMetadata);
 
         new DefaultOspChain(plugins).execute(httpServletRequest, httpServletResponse);
         return null;

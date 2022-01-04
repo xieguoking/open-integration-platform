@@ -2,9 +2,11 @@ package com.shdata.osp.web.plugin.dubbo;
 
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONUtil;
+import com.shdata.osp.vs.DefaultVirtualService;
 import com.shdata.osp.web.plugin.OspPlugin;
 import com.shdata.osp.web.plugin.OspPluginChain;
 import com.shdata.osp.web.plugin.base.BodyParamUtils;
+import com.shdata.osp.web.plugin.base.OspConstants;
 import com.shdata.osp.web.plugin.base.PluginEnum;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
@@ -49,22 +51,22 @@ public class DubboOspPlugin implements OspPlugin {
     }
 
     @Override
-    public boolean skip(HttpServletRequest httpServletRequest) {
-        return false;
+    public boolean skip(final HttpServletRequest httpServletRequest) {
+        return skip(httpServletRequest, DefaultVirtualService.KEY_SERVICE_TYPE, PluginEnum.DUBBO);
     }
 
     @Override
-    public void execute(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, OspPluginChain ospPluginChain) throws IOException {
+    public void execute(final HttpServletRequest httpServletRequest, final HttpServletResponse httpServletResponse, final OspPluginChain ospPluginChain) throws IOException {
         //入参
-        String body = (String) httpServletRequest.getAttribute("rpc_param");
+        String body = (String) httpServletRequest.getAttribute(OspConstants.RPC_PARAM_KEY);
         //URL协议
-        Map<String, String> paris = (Map<String, String>) httpServletRequest.getAttribute("strategy_rule_paris");
+        Map<String, String> paris = (Map<String, String>) httpServletRequest.getAttribute(OspConstants.STRATEGY_RULE_PARIS_KEY);
 
         //先手动执行 后续用监听 设置缓存的东西
-        String interfaceName = paris.get("interfaceName");
-        String methodName = paris.get("method");
-        String groupName = paris.get("group");
-        String versionName = paris.get("version");
+        String interfaceName = paris.get(OspConstants.INTERFACE_NAME_KEY);
+        String methodName = paris.get(OspConstants.METHOD_KEY);
+        String groupName = paris.get(OspConstants.GROUP_KEY);
+        String versionName = paris.get(OspConstants.VERSION_KEY);
 
         MetaData metaData = dubboRegistryServerSync.getRegistryMetaCache()
                 .get(interfaceName) != null ? dubboRegistryServerSync.getRegistryMetaCache().get(interfaceName)

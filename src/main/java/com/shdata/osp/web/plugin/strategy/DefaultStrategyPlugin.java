@@ -2,8 +2,10 @@ package com.shdata.osp.web.plugin.strategy;
 
 import cn.hutool.core.util.ArrayUtil;
 import cn.hutool.core.util.StrUtil;
+import com.shdata.osp.vs.DefaultVirtualService;
 import com.shdata.osp.web.plugin.OspPlugin;
 import com.shdata.osp.web.plugin.OspPluginChain;
+import com.shdata.osp.web.plugin.base.OspConstants;
 import com.shdata.osp.web.plugin.base.PluginEnum;
 
 import javax.servlet.http.HttpServletRequest;
@@ -35,8 +37,8 @@ public class DefaultStrategyPlugin implements OspPlugin {
     }
 
     @Override
-    public boolean skip(HttpServletRequest httpServletRequest) {
-        return false;
+    public boolean skip(final HttpServletRequest httpServletRequest) {
+        return skip(httpServletRequest, DefaultVirtualService.KEY_SERVICE_STRATEGY, PluginEnum.STRATEGY_DEFAULT);
     }
 
 
@@ -46,8 +48,8 @@ public class DefaultStrategyPlugin implements OspPlugin {
      * @param httpServletRequest
      */
     @Override
-    public void execute(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, OspPluginChain ospPluginChain) throws IOException {
-        httpServletRequest.setAttribute("strategy_rule_paris", resolveUrlToReferenceRule(httpServletRequest.getRequestURI()));
+    public void execute(final HttpServletRequest httpServletRequest, final HttpServletResponse httpServletResponse,final OspPluginChain ospPluginChain) throws IOException {
+        httpServletRequest.setAttribute(OspConstants.STRATEGY_RULE_PARIS_KEY, resolveUrlToReferenceRule(httpServletRequest.getRequestURI()));
         ospPluginChain.execute(httpServletRequest, httpServletResponse);
     }
 
@@ -65,11 +67,11 @@ public class DefaultStrategyPlugin implements OspPlugin {
                 .collect(Collectors.joining("."));
 
         Map<String, String> map = new HashMap();
-        map.put("interfaceName", interfaceName);
-        map.put("version", "~".equals(version) ? "" : version);
-        map.put("group", "~".equals(group) ? "" : group);
-        map.put("serviceId", serviceId);
-        map.put("method", method);
+        map.put(OspConstants.INTERFACE_NAME_KEY, interfaceName);
+        map.put(OspConstants.VERSION_KEY, "~".equals(version) ? "" : version);
+        map.put(OspConstants.GROUP_KEY, "~".equals(group) ? "" : group);
+        map.put(OspConstants.SERVICE_ID_KEY, serviceId);
+        map.put(OspConstants.METHOD_KEY, method);
         return map;
     }
 }
