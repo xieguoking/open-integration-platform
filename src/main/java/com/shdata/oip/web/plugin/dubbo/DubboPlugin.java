@@ -8,8 +8,10 @@ import com.shdata.oip.web.plugin.OspPluginChain;
 import com.shdata.oip.web.plugin.base.BodyParamUtils;
 import com.shdata.oip.web.plugin.base.OspConstants;
 import com.shdata.oip.web.plugin.base.PluginEnum;
+import com.shdata.oip.web.plugin.dubbo.cache.DubboConfigCache;
 import com.shdata.oip.web.plugin.dubbo.meta.DubboRegistryServerSync;
 import com.shdata.oip.web.plugin.dubbo.meta.MetaData;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.dubbo.config.ReferenceConfig;
@@ -64,27 +66,22 @@ public class DubboPlugin implements OspPlugin {
         //URL协议
         Map<String, String> paris = (Map<String, String>) httpServletRequest.getAttribute(OspConstants.STRATEGY_RULE_PARIS_KEY);
 
-        //先手动执行 后续用监听 设置缓存的东西
         String interfaceName = paris.get(OspConstants.INTERFACE_NAME_KEY);
         String methodName = paris.get(OspConstants.METHOD_KEY);
         String groupName = paris.get(OspConstants.GROUP_KEY);
         String versionName = paris.get(OspConstants.VERSION_KEY);
+        String interfaceMergerKey = String.format("%s:%s:%s", interfaceName, versionName, groupName);
 
+        //获取元数据：最最最最最最需要优化的一个点
         MetaData metaData = dubboRegistryServerSync.getRegistryMetaCache()
-                .get(interfaceName) != null ? dubboRegistryServerSync.getRegistryMetaCache().get(interfaceName)
-                : dubboRegistryServerSync.getProvider(interfaceName);
+                .get(interfaceMergerKey) != null
+                ? dubboRegistryServerSync.getRegistryMetaCache().get(interfaceMergerKey)
+                : dubboRegistryServerSync.getProvider(interfaceMergerKey);
 
-        GenericService genericService = genericServiceCache.get(interfaceName);
-        synchronized (Object.class) {
-            if (genericService == null) {
-                ReferenceConfig<GenericService> reference = new ReferenceConfig<>();
-                reference.setInterface(interfaceName);
-                reference.setVersion(versionName);
-                reference.setGeneric(true);
-                reference.setGroup(groupName);
-                genericService = reference.get();
-                genericServiceCache.put(interfaceName, genericService);
-            }
+        ReferenceConfig<GenericService> reference = DubboConfigCache.getInstance().get(interfaceMergerKey);
+        if (Objects.isNull(reference) || StringUtils.isEmpty(reference.getInterface())) {
+            DubboConfigCache.getInstance().invalidate(interfaceMergerKey);
+            reference = DubboConfigCache.getInstance().initRef(metaData);
         }
 
         Pair<String[], Object[]> pair;
@@ -95,6 +92,7 @@ public class DubboPlugin implements OspPlugin {
             pair = BodyParamUtils.buildParameters(body, parameterTypes);
         }
 
+        GenericService genericService = reference.get();
         Object object = genericService.$invoke(methodName, pair.getLeft(), pair.getRight());
 
         httpServletResponse.setCharacterEncoding("UTF-8");

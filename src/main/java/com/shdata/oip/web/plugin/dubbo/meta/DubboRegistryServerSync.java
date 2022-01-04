@@ -2,6 +2,7 @@ package com.shdata.oip.web.plugin.dubbo.meta;
 
 import cn.hutool.core.lang.Assert;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.shdata.oip.web.plugin.dubbo.cache.DubboConfigCache;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.dubbo.common.config.Environment;
 import org.apache.dubbo.common.config.configcenter.DynamicConfiguration;
@@ -43,10 +44,10 @@ public class DubboRegistryServerSync {
     /**
      * 这个后面要换成监听
      */
-    public MetaData getProvider(String interfaceName) {
+    public MetaData getProvider(String interfaceMergerKey) {
         initAllService();
 
-        return registryMetaCache.get(interfaceName);
+        return registryMetaCache.get(interfaceMergerKey);
     }
 
 
@@ -54,7 +55,13 @@ public class DubboRegistryServerSync {
     public void startInitCache() {
         log.info("Init Dubbo meta data Sync Cache...");
         this.initAllService();
+        this.initDubboConfigCache();
     }
+
+    private void initDubboConfigCache() {
+        this.registryMetaCache.values().stream().forEach(v -> DubboConfigCache.getInstance().initRef(v));
+    }
+
 
     private void initAllService() {
         //获取所有服务 dubbo的提供者服务是以providers打头
@@ -70,6 +77,7 @@ public class DubboRegistryServerSync {
             metaData.setInterfaceName(serviceInstance.getMetadata().getOrDefault(CommonConstants.INTERFACE_KEY, ""));
             metaData.setVersion(serviceInstance.getMetadata().getOrDefault(CommonConstants.VERSION_KEY, ""));
             metaData.setApplication(serviceInstance.getMetadata().getOrDefault(CommonConstants.APPLICATION_KEY, ""));
+            metaData.setGroup(serviceInstance.getMetadata().getOrDefault(CommonConstants.GROUP_KEY, ""));
             //获取元数据
             MetadataIdentifier metadataIdentifier = new MetadataIdentifier(
                     metaData.getInterfaceName(),
@@ -89,7 +97,7 @@ public class DubboRegistryServerSync {
             } catch (Exception e) {
                 log.error(e.getMessage(), e);
             }
-            registryMetaCache.put(metaData.getInterfaceName(), metaData);
+            registryMetaCache.put(String.format("%s:%s:%s", metaData.getInterfaceName(), metaData.getVersion(), metaData.getGroup()), metaData);
         }
     }
 }
