@@ -38,7 +38,7 @@ public class OpenSupportPlatform {
         shenyuRegisterCenterConfig.setRegisterType("nacos");
         shenyuRegisterCenterConfig.setServerLists(nacosDiscoveryProperties.getServerAddr());
         Properties prop = new Properties();
-        prop.setProperty("nacosNameSpace", nacosDiscoveryProperties.getNamespace());//必须
+        prop.setProperty("nacosNameSpace", "public".equals(nacosDiscoveryProperties.getNamespace()) ? "" : nacosDiscoveryProperties.getNamespace());//必须
         shenyuRegisterCenterConfig.setProps(prop);
         return shenyuRegisterCenterConfig;
     }
