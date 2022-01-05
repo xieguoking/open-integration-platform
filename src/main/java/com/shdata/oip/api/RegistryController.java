@@ -3,7 +3,7 @@ package com.shdata.oip.api;
 import com.shdata.oip.dto.ServiceConfigDTO;
 import com.shdata.oip.spi.VirtualServiceRegistry;
 import com.shdata.oip.vs.DubboVirtualService;
-import com.shdata.oip.vs.shenyu.nacos.ShenYuNacosCenterServiceRegistry;
+import com.shdata.oip.vs.ShenYuNacosServiceRegistry;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
@@ -29,7 +29,6 @@ public class RegistryController {
 
     private final DiscoveryClient discoveryClient;
     private final VirtualServiceRegistry virtualServiceRegistry;
-    private final ShenYuNacosCenterServiceRegistry shenYuNacosCenterServiceRegistry;
 
 
     @GetMapping("app/{name}/{ip}")
@@ -59,9 +58,9 @@ public class RegistryController {
         virtualService.setPort(serviceConfigDTO.getOspPort());
         virtualService.setServiceType(serviceConfigDTO.getServiceType());
         virtualService.setTransformStrategy(serviceConfigDTO.getTransformStrategy());
+        virtualService.setServiceDesc(serviceConfigDTO.getServiceDesc());
 
         virtualServiceRegistry.register(virtualService);
-        shenYuNacosCenterServiceRegistry.register(serviceConfigDTO);
 //        TODO 持久化落库
         return serviceConfigDTO;
     }

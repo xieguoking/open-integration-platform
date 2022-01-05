@@ -25,7 +25,6 @@ public class NacosVirtualServiceRegistry implements VirtualServiceRegistry, Appl
     @Autowired
     private ServiceRegistry serviceRegistry;
 
-
     @Autowired
     private NacosDiscoveryProperties nacosDiscoveryProperties;
 

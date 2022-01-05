@@ -34,7 +34,7 @@ public class OspHandlerMapping extends AbstractHandlerMapping {
         String removePrefixString = StrUtil.removePrefix(var1.getRequestURI(), "/");
         String serviceId = removePrefixString.split("\\/")[0];
 
-        //只接受存在服务注册中心的适配请求 每一次都会请求，这里是不是要优化一下
+        //TODO 只接受存在服务注册中心的适配请求 每一次都会请求，这里是不是要优化一下
         List<ServiceInstance> serviceInstanceList = discoveryClient.getInstances(serviceId);
         if (serviceInstanceList.isEmpty()) {
             log.warn("{}:注册中心不存在，不进行转发", serviceId);

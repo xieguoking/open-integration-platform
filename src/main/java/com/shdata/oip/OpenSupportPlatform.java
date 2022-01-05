@@ -1,7 +1,7 @@
 package com.shdata.oip;
 
 import com.alibaba.cloud.nacos.NacosDiscoveryProperties;
-import com.shdata.oip.vs.NacosVirtualServiceRegistry;
+import com.shdata.oip.vs.ShenYuNacosServiceRegistry;
 import org.apache.shenyu.register.common.config.ShenyuRegisterCenterConfig;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -25,14 +25,13 @@ public class OpenSupportPlatform {
         SpringApplication.run(OpenSupportPlatform.class, args);
     }
 
+
     @Bean
-    public NacosVirtualServiceRegistry nacosVirtualServiceRegistry() {
-        return new NacosVirtualServiceRegistry();
+    public ShenYuNacosServiceRegistry shenYuNacosServiceRegistry(ShenyuRegisterCenterConfig shenyuRegisterCenterConfig) {
+        return new ShenYuNacosServiceRegistry(shenyuRegisterCenterConfig);
     }
 
-    /**
-     * 注册中心的配置
-     */
+
     @Bean
     public ShenyuRegisterCenterConfig shenyuRegisterCenterConfig(NacosDiscoveryProperties nacosDiscoveryProperties) {
         ShenyuRegisterCenterConfig shenyuRegisterCenterConfig = new ShenyuRegisterCenterConfig();

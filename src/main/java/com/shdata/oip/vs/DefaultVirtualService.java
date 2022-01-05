@@ -20,6 +20,7 @@ public class DefaultVirtualService implements VirtualService {
     public static final String KEY_SERVICE_TYPE = "SHDATA.service.type";
     public static final String KEY_PREFIX = "SHDATA.service.prefix";
     public static final String KEY_SERVICE_STRATEGY = "SHDATA.service.strategy";
+    public static final String KEY_SERVICE_DESC = "SHDATA.service.desc";
 
     private String service;
     private String serviceName;
@@ -33,6 +34,10 @@ public class DefaultVirtualService implements VirtualService {
 
     public void setTransformStrategy(String transformStrategyName) {
         metadata.put(KEY_SERVICE_STRATEGY, transformStrategyName);
+    }
+
+    public void setServiceDesc(String serviceDesc) {
+        metadata.put(KEY_SERVICE_DESC, serviceDesc);
     }
 
 
