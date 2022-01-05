@@ -1,5 +1,6 @@
 package com.shdata.oip.web.plugin.dubbo.meta;
 
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.lang.Assert;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.shdata.oip.web.plugin.dubbo.cache.DubboConfigCache;
@@ -66,6 +67,10 @@ public class DubboRegistryServerSync {
     private void initAllService() {
         //获取所有服务 dubbo的提供者服务是以providers打头
         List<String> services = discoveryClient.getServices();
+        if (CollUtil.isEmpty(services)) {
+            return;
+        }
+
         List<String> dubboProviderServices = services.stream().filter(x -> x.startsWith(CommonConstants.PROVIDER)).collect(Collectors.toList());
 
         Environment environment = ApplicationModel.getEnvironment();
