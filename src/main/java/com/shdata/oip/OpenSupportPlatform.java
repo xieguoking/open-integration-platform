@@ -1,7 +1,7 @@
 package com.shdata.oip;
 
 import com.alibaba.cloud.nacos.NacosDiscoveryProperties;
-import com.shdata.oip.vs.ShenYuNacosServiceRegistry;
+import com.shdata.oip.core.vs.ShenYuNacosServiceRegistry;
 import org.apache.shenyu.register.common.config.ShenyuRegisterCenterConfig;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -17,7 +17,7 @@ import java.util.Properties;
  * @version 1.0
  * @since 1.0
  */
-@SpringBootApplication(exclude = {RedisAutoConfiguration.class})
+@SpringBootApplication(scanBasePackages = "com.shdata.oip")
 @EnableDiscoveryClient
 public class OpenSupportPlatform {
 

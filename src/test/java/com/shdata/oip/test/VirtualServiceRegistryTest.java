@@ -1,8 +1,8 @@
 package com.shdata.oip.test;
 
 import com.shdata.oip.OpenSupportPlatform;
-import com.shdata.oip.api.RegistryController;
-import com.shdata.oip.dto.ServiceConfigDTO;
+import com.shdata.oip.modular.api.RegistryController;
+import com.shdata.oip.modular.model.dto.ServiceConfigDTO;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -31,6 +31,7 @@ public class VirtualServiceRegistryTest {
     @Test
     public void shenYnNacosRegistry() throws InterruptedException {
         ServiceConfigDTO serviceConfigDTO = new ServiceConfigDTO();
+        serviceConfigDTO.setPackagePrefix("com.dave");
         serviceConfigDTO.setServiceType("dubbo");
         serviceConfigDTO.setServiceName("万达金保二期");
         serviceConfigDTO.setServiceId("dubbo-service");
