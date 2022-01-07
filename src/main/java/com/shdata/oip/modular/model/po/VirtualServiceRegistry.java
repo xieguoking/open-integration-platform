@@ -5,8 +5,7 @@ import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
 
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
+import java.util.Date;
 
 /**
  * <p>
@@ -26,7 +25,7 @@ public class VirtualServiceRegistry {
      * 唯一标识
      */
     @TableId("ID")
-    private BigDecimal id;
+    private Long id;
 
     /**
      * ServiceID
@@ -56,7 +55,7 @@ public class VirtualServiceRegistry {
      * PORT
      */
     @TableField("PORT")
-    private BigDecimal port;
+    private int port;
 
     /**
      * METADATA
@@ -74,13 +73,13 @@ public class VirtualServiceRegistry {
      * 注册时间
      */
     @TableField("REG_TIME")
-    private LocalDateTime regTime;
+    private Date regTime;
 
     /**
      * 检测时间
      */
     @TableField("LAST_TIME")
-    private LocalDateTime lastTime;
+    private Date lastTime;
 
     /**
      * 注册状态 0：失败 1：成功 2：未知

@@ -17,6 +17,7 @@ import org.springframework.cloud.client.discovery.DiscoveryClient;
 import org.springframework.context.event.EventListener;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.stream.Collectors;
@@ -40,6 +41,15 @@ public class DubboRegistryServerSync {
 
     public ConcurrentMap<String, MetaData> getRegistryMetaCache() {
         return registryMetaCache;
+    }
+
+    public MetaData getRegistryMetaCache(String interfaceMergerKey) {
+        MetaData metaData = registryMetaCache.get(interfaceMergerKey);
+        if (Objects.isNull(metaData)) {
+            initService(CollUtil.newArrayList(interfaceMergerKey));
+            metaData = registryMetaCache.get(interfaceMergerKey);
+        }
+        return metaData;
     }
 
     /**
@@ -70,9 +80,12 @@ public class DubboRegistryServerSync {
         if (CollUtil.isEmpty(services)) {
             return;
         }
-
         List<String> dubboProviderServices = services.stream().filter(x -> x.startsWith(CommonConstants.PROVIDER)).collect(Collectors.toList());
+        initService(dubboProviderServices);
+    }
 
+
+    private void initService(List<String> dubboProviderServices) {
         Environment environment = ApplicationModel.getEnvironment();
         DynamicConfiguration dynamicConfiguration = environment.getDynamicConfiguration().get();
 

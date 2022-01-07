@@ -2,6 +2,7 @@ package com.shdata.oip.core.web.plugin.strategy;
 
 import cn.hutool.core.util.ArrayUtil;
 import cn.hutool.core.util.StrUtil;
+import com.shdata.oip.core.common.OipConstants;
 import com.shdata.oip.core.vs.DefaultVirtualService;
 import com.shdata.oip.core.web.plugin.OspPlugin;
 import com.shdata.oip.core.web.plugin.OspPluginChain;
@@ -38,7 +39,7 @@ public class DefaultStrategyPlugin implements OspPlugin {
 
     @Override
     public boolean skip(final HttpServletRequest httpServletRequest) {
-        return skip(httpServletRequest, DefaultVirtualService.KEY_SERVICE_STRATEGY, PluginEnum.STRATEGY_DEFAULT);
+        return skip(httpServletRequest, OipConstants.KEY_SERVICE_STRATEGY, PluginEnum.STRATEGY_DEFAULT);
     }
 
 

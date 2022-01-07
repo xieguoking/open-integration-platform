@@ -25,7 +25,7 @@ public class Apis {
      * 唯一标识
      */
     @TableId("APIID")
-    private BigDecimal apiid;
+    private Long apiid;
 
     /**
      * ServiceID
@@ -37,7 +37,7 @@ public class Apis {
      * 服务标识
      */
     @TableField("SID")
-    private BigDecimal sid;
+    private Long sid;
 
     @TableField("API_NAME")
     private String apiName;

@@ -13,4 +13,6 @@ import com.shdata.oip.modular.model.po.VirtualServiceRegistry;
  */
 public interface VirtualServiceRegitryMapper extends BaseMapper<VirtualServiceRegistry> {
 
+
+
 }

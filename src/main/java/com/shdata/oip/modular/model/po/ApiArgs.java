@@ -5,11 +5,9 @@ import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
 
-import java.math.BigDecimal;
-
 /**
  * <p>
- * 
+ *
  * </p>
  *
  * @author wangwj
@@ -25,7 +23,7 @@ public class ApiArgs {
      * 唯一标识
      */
     @TableId("APIID")
-    private BigDecimal apiid;
+    private Long apiid;
 
     /**
      * ServiceID
@@ -37,7 +35,7 @@ public class ApiArgs {
      * 服务标识
      */
     @TableField("SID")
-    private BigDecimal sid;
+    private Long sid;
 
     /**
      * 参数名称
@@ -61,7 +59,7 @@ public class ApiArgs {
      * 参数顺序
      */
     @TableField("ARG_ORDER")
-    private BigDecimal argOrder;
+    private int argOrder;
 
 
     public static final String APIID = "APIID";

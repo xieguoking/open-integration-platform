@@ -1,5 +1,7 @@
 package com.shdata.oip.core.vs;
 
+import com.shdata.oip.core.common.OipConstants;
+
 import javax.annotation.PostConstruct;
 
 /**
@@ -10,14 +12,13 @@ import javax.annotation.PostConstruct;
  */
 public class DubboVirtualService extends DefaultVirtualService {
 
-    public static final String KEY_PACKAGE_PREFIX = "SHDATA.dubbo.package.prefix";
 
     public void setPackagePrefix(String packagePrefix) {
-        getMetadata().put(KEY_PACKAGE_PREFIX, packagePrefix);
+        getMetadata().put(OipConstants.KEY_PACKAGE_PREFIX, packagePrefix);
     }
 
     public String getPackagePrefix() {
-        return getMetadata().get(KEY_PACKAGE_PREFIX);
+        return getMetadata().get(OipConstants.KEY_PACKAGE_PREFIX);
     }
 
     @PostConstruct

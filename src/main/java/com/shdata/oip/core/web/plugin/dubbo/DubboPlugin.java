@@ -2,7 +2,7 @@ package com.shdata.oip.core.web.plugin.dubbo;
 
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONUtil;
-import com.shdata.oip.core.vs.DefaultVirtualService;
+import com.shdata.oip.core.common.OipConstants;
 import com.shdata.oip.core.web.plugin.OspPlugin;
 import com.shdata.oip.core.web.plugin.OspPluginChain;
 import com.shdata.oip.core.web.plugin.base.BodyParamUtils;
@@ -56,7 +56,7 @@ public class DubboPlugin implements OspPlugin {
 
     @Override
     public boolean skip(final HttpServletRequest httpServletRequest) {
-        return skip(httpServletRequest, DefaultVirtualService.KEY_SERVICE_TYPE, PluginEnum.DUBBO);
+        return skip(httpServletRequest, OipConstants.KEY_SERVICE_TYPE, PluginEnum.DUBBO);
     }
 
     @Override

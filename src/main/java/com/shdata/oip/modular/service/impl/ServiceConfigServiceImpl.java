@@ -1,11 +1,12 @@
 package com.shdata.oip.modular.service.impl;
 
-import cn.hutool.core.lang.Assert;
 import cn.hutool.core.util.StrUtil;
+import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.shdata.oip.core.common.OipConstants;
 import com.shdata.oip.core.spi.VirtualService;
-import com.shdata.oip.core.vs.DefaultVirtualService;
+import com.shdata.oip.core.vs.DubboVirtualService;
 import com.shdata.oip.modular.dao.ServiceConfigMapper;
 import com.shdata.oip.modular.model.po.ServiceConfig;
 import com.shdata.oip.modular.model.po.ServiceConfigMetadata;
@@ -20,6 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
@@ -43,8 +45,12 @@ public class ServiceConfigServiceImpl extends ServiceImpl<ServiceConfigMapper, S
     @Transactional
     @Override
     public void analysisIntoDb(VirtualService virtualService) {
-        long count = this.count(new QueryWrapper<ServiceConfig>().lambda().eq(ServiceConfig::getServiceID, virtualService.getService()));
-        Assert.isTrue(count == 0, "【{}】，配置已存在", virtualService.getService());
+        ServiceConfig isExist = this.getOne(new QueryWrapper<ServiceConfig>().lambda().eq(ServiceConfig::getServiceID, virtualService.getService()));
+        if (Objects.nonNull(isExist)) {
+            this.removeById(isExist);
+            iServiceConfigPluginsService.remove(new QueryWrapper<ServiceConfigPlugins>().lambda().eq(ServiceConfigPlugins::getSid, isExist.getId()));
+            iServiceConfigMetadataService.remove(new QueryWrapper<ServiceConfigMetadata>().lambda().eq(ServiceConfigMetadata::getSid, isExist.getId()));
+        }
 
         //服务整合配置表
         ServiceConfig serviceConfig = transFormServiceConfig(virtualService);
@@ -55,6 +61,34 @@ public class ServiceConfigServiceImpl extends ServiceImpl<ServiceConfigMapper, S
         //服务元数据信息表
         List<ServiceConfigMetadata> serviceConfigMetadata = transFormServiceConfigMetadata(serviceConfig.getId(), virtualService);
         iServiceConfigMetadataService.saveBatch(serviceConfigMetadata);
+    }
+
+    @Override
+    public List<VirtualService> analysisReadDb() {
+        List<ServiceConfig> serviceConfigs = this.list();
+        List<VirtualService> virtualServices = serviceConfigs
+                .stream()
+                .map(this::buildVirtualService)
+                .collect(Collectors.toList());
+        return virtualServices;
+    }
+
+    private VirtualService buildVirtualService(ServiceConfig serviceConfig) {
+        if (serviceConfig == null) {
+            return null;
+        }
+
+        Map<String, String> metaData = JSONUtil.toBean(serviceConfig.getMetadata(), Map.class);
+        DubboVirtualService virtualService = new DubboVirtualService();
+        virtualService.setService(serviceConfig.getServiceID());
+        virtualService.setPackagePrefix(metaData.getOrDefault(OipConstants.KEY_PACKAGE_PREFIX, ""));
+        virtualService.setServiceName(serviceConfig.getServiceName());
+        virtualService.setIp(serviceConfig.getVip());
+        virtualService.setPort(serviceConfig.getVPort());
+        virtualService.setServiceType(serviceConfig.getServiceType());
+        virtualService.setTransformStrategy(metaData.getOrDefault(OipConstants.KEY_SERVICE_STRATEGY, ""));
+        virtualService.setServiceDesc(metaData.getOrDefault(OipConstants.KEY_SERVICE_DESC, ""));
+        return virtualService;
     }
 
     private ServiceConfig transFormServiceConfig(VirtualService virtualService) {
@@ -68,6 +102,7 @@ public class ServiceConfigServiceImpl extends ServiceImpl<ServiceConfigMapper, S
         serviceConfig.setUpdateTime(LocalDateTime.now());
         serviceConfig.setVip(virtualService.getIp());
         serviceConfig.setVPort(virtualService.getPort());
+        serviceConfig.setMetadata(JSONUtil.toJsonStr(virtualService.getMetadata()));
         return serviceConfig;
     }
 
@@ -75,7 +110,7 @@ public class ServiceConfigServiceImpl extends ServiceImpl<ServiceConfigMapper, S
     private List<ServiceConfigPlugins> transFormServiceConfigPlugins(Long sid, VirtualService virtualService) {
         List<ServiceConfigPlugins> list = new ArrayList<>();
         list.add(transFormPluginType(sid, virtualService.getServiceType()));
-        list.add(transFormPluginType(sid, virtualService.getMetadata().get(DefaultVirtualService.KEY_SERVICE_STRATEGY)));
+        list.add(transFormPluginType(sid, virtualService.getMetadata().get(OipConstants.KEY_SERVICE_STRATEGY)));
         list.remove(null);
         return list;
     }

@@ -1,9 +1,12 @@
 package com.shdata.oip.core.vs;
 
+import cn.hutool.core.date.DateUtil;
+import com.shdata.oip.core.common.OipConstants;
 import com.shdata.oip.core.spi.VirtualService;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -17,10 +20,6 @@ import java.util.Map;
 @Setter
 public class DefaultVirtualService implements VirtualService {
 
-    public static final String KEY_SERVICE_TYPE = "SHDATA.service.type";
-    public static final String KEY_PREFIX = "SHDATA.service.prefix";
-    public static final String KEY_SERVICE_STRATEGY = "SHDATA.service.strategy";
-    public static final String KEY_SERVICE_DESC = "SHDATA.service.desc";
 
     private String service;
     private String serviceName;
@@ -28,31 +27,35 @@ public class DefaultVirtualService implements VirtualService {
     private int port;
     private Map<String, String> metadata = new HashMap<>();
 
+    public DefaultVirtualService() {
+        getMetadata().put(OipConstants.KEY_SERVICE_REG_TIME, DateUtil.formatDateTime(new Date()));
+    }
+
     public void setServiceType(String serviceType) {
-        metadata.put(KEY_SERVICE_TYPE, serviceType);
+        metadata.put(OipConstants.KEY_SERVICE_TYPE, serviceType);
     }
 
     public void setTransformStrategy(String transformStrategyName) {
-        metadata.put(KEY_SERVICE_STRATEGY, transformStrategyName);
+        metadata.put(OipConstants.KEY_SERVICE_STRATEGY, transformStrategyName);
     }
 
     public void setServiceDesc(String serviceDesc) {
-        metadata.put(KEY_SERVICE_DESC, serviceDesc);
+        metadata.put(OipConstants.KEY_SERVICE_DESC, serviceDesc);
     }
 
 
     @Override
     public String getServiceType() {
-        return metadata.get(KEY_SERVICE_TYPE);
+        return metadata.get(OipConstants.KEY_SERVICE_TYPE);
     }
 
     public void setPrefix(String prefix) {
-        metadata.put(KEY_PREFIX, prefix);
+        metadata.put(OipConstants.KEY_SERVICE_PREFIX, prefix);
     }
 
     @Override
     public String getPrefix() {
-        return metadata.get(KEY_PREFIX);
+        return metadata.get(OipConstants.KEY_SERVICE_PREFIX);
     }
 
 }

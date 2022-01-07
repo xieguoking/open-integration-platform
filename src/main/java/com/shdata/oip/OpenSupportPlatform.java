@@ -2,10 +2,11 @@ package com.shdata.oip;
 
 import com.alibaba.cloud.nacos.NacosDiscoveryProperties;
 import com.shdata.oip.core.vs.ShenYuNacosServiceRegistry;
+import com.shdata.oip.modular.handler.VirtualServiceListHandler;
+import com.shdata.oip.modular.handler.VirtualServiceRegistryHandler;
 import org.apache.shenyu.register.common.config.ShenyuRegisterCenterConfig;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration;
 import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 import org.springframework.context.annotation.Bean;
 
@@ -23,6 +24,17 @@ public class OpenSupportPlatform {
 
     public static void main(String[] args) {
         SpringApplication.run(OpenSupportPlatform.class, args);
+    }
+
+
+    @Bean
+    public VirtualServiceRegistryHandler virtualServiceRegistryHandler() {
+        return new VirtualServiceRegistryHandler();
+    }
+
+    @Bean
+    public VirtualServiceListHandler virtualServiceListHandler() {
+        return new VirtualServiceListHandler();
     }
 
 
