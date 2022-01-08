@@ -4,7 +4,7 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.google.common.cache.RemovalListener;
-import com.shdata.oip.core.web.plugin.dubbo.meta.MetaData;
+import com.shdata.oip.core.dubbo.po.MetaData;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.reflect.FieldUtils;
 import org.apache.dubbo.config.ReferenceConfig;
@@ -99,7 +99,7 @@ public final class DubboConfigCache {
         try {
             Object obj = reference.get();
             if (Objects.nonNull(obj)) {
-                LOG.info("init apache dubbo reference success there meteData is :{}", metaData);
+                LOG.debug("init apache dubbo reference success there meteData is :{}", metaData);
                 cache.put(String.format("%s:%s:%s", metaData.getInterfaceName(), metaData.getVersion(), metaData.getGroup()), reference);
             }
         } catch (Exception e) {

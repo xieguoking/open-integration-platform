@@ -2,13 +2,13 @@ package com.shdata.oip.core.web.handler;
 
 import cn.hutool.core.lang.Assert;
 import cn.hutool.core.util.StrUtil;
+import com.shdata.oip.core.manage.ServiceInstanceManager;
 import com.shdata.oip.core.web.plugin.OspPlugin;
 import com.shdata.oip.core.web.plugin.OspPluginChain;
 import com.shdata.oip.core.web.plugin.base.OspConstants;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cloud.client.ServiceInstance;
-import org.springframework.cloud.client.discovery.DiscoveryClient;
 import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.HttpServletRequest;
@@ -25,13 +25,13 @@ import java.util.Map;
 @Slf4j
 public class OspWebHandler implements OspHandler {
 
-    private DiscoveryClient discoveryClient;
+    private ServiceInstanceManager serviceInstanceManager;
 
     private List<OspPlugin> plugins;
 
 
-    public OspWebHandler(DiscoveryClient discoveryClient, final List<OspPlugin> plugins) {
-        this.discoveryClient = discoveryClient;
+    public OspWebHandler(ServiceInstanceManager serviceInstanceManager, final List<OspPlugin> plugins) {
+        this.serviceInstanceManager = serviceInstanceManager;
         this.plugins = plugins;
     }
 
@@ -42,10 +42,10 @@ public class OspWebHandler implements OspHandler {
         String serviceId = removePrefixString.split("\\/")[0];
 
         //注册中心的虚拟服务的元数据
-        List<ServiceInstance> serviceInstanceList = discoveryClient.getInstances(serviceId);
-        Assert.notEmpty(serviceInstanceList, String.format("[%s],虚拟服务不存在请确认!", serviceId));
+        ServiceInstance serviceInstance = serviceInstanceManager.getServiceInstanceOne(serviceId);
+        Assert.notNull(serviceInstance, String.format("[%s],虚拟服务无实例，请确认!", serviceId));
 
-        Map<String, String> serviceIdMetadata = serviceInstanceList.stream().findFirst().get().getMetadata();
+        Map<String, String> serviceIdMetadata = serviceInstance.getMetadata();
         httpServletRequest.setAttribute(OspConstants.OSP_CONTEXT, serviceIdMetadata);
 
         new DefaultOspChain(plugins).execute(httpServletRequest, httpServletResponse);

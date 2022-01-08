@@ -1,9 +1,7 @@
 package com.shdata.oip.core.vs;
 
-import cn.hutool.core.date.DateUtil;
 import com.alibaba.cloud.nacos.NacosDiscoveryProperties;
 import com.alibaba.cloud.nacos.registry.NacosRegistration;
-import com.shdata.oip.core.common.OipConstants;
 import com.shdata.oip.core.spi.VirtualService;
 import com.shdata.oip.core.spi.VirtualServiceRegistry;
 import org.apache.commons.lang.StringUtils;
@@ -18,8 +16,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.client.serviceregistry.ServiceRegistry;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
-
-import java.util.Date;
 
 /**
  * @author wangwj
@@ -79,7 +75,10 @@ public class ShenYuNacosServiceRegistry implements VirtualServiceRegistry, Appli
         this.nacosRegistry(service);
     }
 
-
+    /**
+     * 这里nacosClientRegisterRepository.persistURI，它只注册一次，又不想引用 NacosVirtualServiceRegistry.class
+     * 就再写一次吧
+     */
     private void nacosRegistry(VirtualService service) {
 
         NacosDiscoveryProperties nacosDiscoveryProperties = new NacosDiscoveryProperties();

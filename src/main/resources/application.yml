@@ -41,6 +41,7 @@ framework:
 logging:
   level:
     root: info
+    com.shdata: debug
 jwt:
   header: Authorization
 swagger:

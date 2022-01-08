@@ -1,12 +1,15 @@
 package com.shdata.oip.core.config;
 
+import com.shdata.oip.core.dubbo.DubboMetaDataManager;
+import com.shdata.oip.core.dubbo.NacosDubboMetaDataManager;
+import com.shdata.oip.core.manage.NacosServiceInstanceManager;
+import com.shdata.oip.core.manage.ServiceInstanceManager;
 import com.shdata.oip.core.web.handler.OspHandler;
 import com.shdata.oip.core.web.handler.OspHandlerAdapter;
 import com.shdata.oip.core.web.handler.OspHandlerMapping;
 import com.shdata.oip.core.web.handler.OspWebHandler;
 import com.shdata.oip.core.web.plugin.OspPlugin;
 import com.shdata.oip.core.web.plugin.dubbo.DubboPlugin;
-import com.shdata.oip.core.web.plugin.dubbo.meta.DubboRegistryServerSync;
 import com.shdata.oip.core.web.plugin.param.RpcParamTransformPlugin;
 import com.shdata.oip.core.web.plugin.strategy.DefaultStrategyPlugin;
 import org.springframework.cloud.client.discovery.DiscoveryClient;
@@ -37,20 +40,20 @@ public class OipConfig {
      * 映射
      */
     @Bean
-    public OspHandlerMapping ospHandlerMapping(OspHandler ospWebHandler, DiscoveryClient discoveryClient) {
-        return new OspHandlerMapping(ospWebHandler, discoveryClient);
+    public OspHandlerMapping ospHandlerMapping(OspHandler ospWebHandler, ServiceInstanceManager serviceInstanceManager) {
+        return new OspHandlerMapping(ospWebHandler, serviceInstanceManager);
     }
 
     /**
      * 处理器
      */
     @Bean
-    public OspHandler ospWebHandler(final DiscoveryClient discoveryClient, final List<OspPlugin> plugins) {
+    public OspHandler ospWebHandler(final ServiceInstanceManager serviceInstanceManager, final List<OspPlugin> plugins) {
         //排序
         List<OspPlugin> ospPlugins = plugins.stream()
                 .sorted(Comparator.comparingInt(OspPlugin::getOrder))
                 .collect(Collectors.toList());
-        return new OspWebHandler(discoveryClient, ospPlugins);
+        return new OspWebHandler(serviceInstanceManager, ospPlugins);
     }
 
 
@@ -59,13 +62,20 @@ public class OipConfig {
      */
 
     @Bean
-    public DubboPlugin dubboOspPlugin(DubboRegistryServerSync dubboRegistryServerSync) {
-        return new DubboPlugin(dubboRegistryServerSync);
+    public DubboPlugin dubboOspPlugin(DubboMetaDataManager dubboMetaDataManager) {
+        return new DubboPlugin(dubboMetaDataManager);
     }
 
+
     @Bean
-    public DubboRegistryServerSync dubboRegistryServerSync(DiscoveryClient discoveryClient) {
-        return new DubboRegistryServerSync(discoveryClient);
+    public DubboMetaDataManager dubboMetaDataManager(ServiceInstanceManager serviceInstanceManager) {
+        return new NacosDubboMetaDataManager(serviceInstanceManager);
+    }
+
+
+    @Bean
+    public ServiceInstanceManager serviceInstanceManager(DiscoveryClient discoveryClient) {
+        return new NacosServiceInstanceManager(discoveryClient);
     }
 
     @Bean

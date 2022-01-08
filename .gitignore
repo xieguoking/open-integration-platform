@@ -23,8 +23,11 @@
 hs_err_pid*
 
 */target/
+*/target/classes
 .idea/
 *.iml
 
 */nacosSync.0.4.7/
 /target/classes/application.yml
+/target/classes/logback-spring.xml
+/target/classes/spy.properties

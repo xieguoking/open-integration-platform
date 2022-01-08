@@ -1,4 +1,4 @@
-package com.shdata.oip.core.web.plugin.dubbo.meta;
+package com.shdata.oip.core.dubbo.po;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;

@@ -1,4 +1,4 @@
-package com.shdata.oip.core.web.plugin.dubbo.meta;
+package com.shdata.oip.core.dubbo.po;
 
 import lombok.Getter;
 import lombok.Setter;
