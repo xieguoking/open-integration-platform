@@ -32,7 +32,6 @@ public class NacosVirtualServiceRegistry implements VirtualServiceRegistry, Appl
 
     @Override
     public void register(VirtualService service) {
-
         NacosDiscoveryProperties nacosDiscoveryProperties = new NacosDiscoveryProperties();
         BeanUtils.copyProperties(this.nacosDiscoveryProperties, nacosDiscoveryProperties);
 

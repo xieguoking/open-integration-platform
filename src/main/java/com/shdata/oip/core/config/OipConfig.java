@@ -1,5 +1,6 @@
 package com.shdata.oip.core.config;
 
+import com.alibaba.cloud.nacos.NacosDiscoveryProperties;
 import com.shdata.oip.core.dubbo.DubboMetaDataManager;
 import com.shdata.oip.core.dubbo.NacosDubboMetaDataManager;
 import com.shdata.oip.core.manage.NacosServiceInstanceManager;
@@ -74,8 +75,8 @@ public class OipConfig {
 
 
     @Bean
-    public ServiceInstanceManager serviceInstanceManager(DiscoveryClient discoveryClient) {
-        return new NacosServiceInstanceManager(discoveryClient);
+    public ServiceInstanceManager serviceInstanceManager(DiscoveryClient discoveryClient, NacosDiscoveryProperties nacosDiscoveryProperties) {
+        return new NacosServiceInstanceManager(discoveryClient, nacosDiscoveryProperties);
     }
 
     @Bean

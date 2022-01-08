@@ -14,7 +14,9 @@ public interface ServiceInstanceStorage {
 
     List<String> allService();
 
-    List<ServiceInstance> getMetaDataByServiceId(String serviceId);
+    List<ServiceInstance> listServiceInstance(String serviceId);
+
+    void removeServiceInstance(String serviceId);
 
     void putService(List<String> serviceList);
 

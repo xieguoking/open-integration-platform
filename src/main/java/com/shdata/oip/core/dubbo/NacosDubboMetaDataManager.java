@@ -10,9 +10,8 @@ import com.shdata.oip.core.dubbo.po.MetaConfig;
 import com.shdata.oip.core.dubbo.po.MetaData;
 import com.shdata.oip.core.dubbo.po.Methods;
 import com.shdata.oip.core.manage.ServiceInstanceManager;
+import com.shdata.oip.core.web.plugin.dubbo.cache.DubboConfigCache;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.dubbo.common.config.configcenter.ConfigChangedEvent;
-import org.apache.dubbo.common.config.configcenter.ConfigurationListener;
 import org.apache.dubbo.common.config.configcenter.DynamicConfiguration;
 import org.apache.dubbo.common.constants.CommonConstants;
 import org.apache.dubbo.metadata.report.identifier.KeyTypeEnum;
@@ -79,7 +78,6 @@ public class NacosDubboMetaDataManager implements DubboMetaDataManager {
     }
 
     private MetaData buildMetaData(ServiceInstance serviceInstance) {
-        //获取元数据
         MetaData metaData = new MetaData();
         metaData.setInterfaceName(serviceInstance.getMetadata().getOrDefault(CommonConstants.INTERFACE_KEY, ""));
         metaData.setVersion(serviceInstance.getMetadata().getOrDefault(CommonConstants.VERSION_KEY, ""));
@@ -96,13 +94,14 @@ public class NacosDubboMetaDataManager implements DubboMetaDataManager {
         log.debug("[{}]获取配置如下:\r\n" + config, metadataIdentifier.getUniqueKey(KeyTypeEnum.UNIQUE_KEY));
         Assert.notBlank(config, String.format("[%s]配置获取失败,请检查!", metadataIdentifier.getUniqueKey(KeyTypeEnum.UNIQUE_KEY)));
 
-        dynamicConfiguration.addListener(metadataIdentifier.getUniqueKey(KeyTypeEnum.UNIQUE_KEY), new ConfigurationListener() {
-            @Override
-            public void process(ConfigChangedEvent event) {
-                //listener key ,has change remove it ,get is over new
-                log.debug("key 【{}】 has change,do remove event", metadataIdentifier.getUniqueKey(KeyTypeEnum.UNIQUE_KEY));
-                metaDataInfos.invalidate(metadataIdentifier.getUniqueKey(KeyTypeEnum.UNIQUE_KEY));
-            }
+        dynamicConfiguration.addListener(metadataIdentifier.getUniqueKey(KeyTypeEnum.UNIQUE_KEY), event -> {
+            //listener key ,has change remove it ,get is over new
+            log.info("key config 【{}】 has change,do remove event", metadataIdentifier.getUniqueKey(KeyTypeEnum.UNIQUE_KEY));
+
+            String interfaceMergerKey = cacheKeyTransform(metaData);
+            metaDataInfos.invalidate(interfaceMergerKey);
+            //dubbo cache remove key ,make it reload cache
+            DubboConfigCache.getInstance().invalidate(interfaceMergerKey);
         });
 
 
@@ -114,7 +113,11 @@ public class NacosDubboMetaDataManager implements DubboMetaDataManager {
             log.info("[{}]解析报错，获取配置如下:\r\n" + config, metadataIdentifier.getUniqueKey(KeyTypeEnum.UNIQUE_KEY));
             log.error(e.getMessage(), e);
         }
-        metaDataInfos.put(String.format("%s:%s:%s", metaData.getInterfaceName(), metaData.getVersion(), metaData.getGroup()), metaData);
+        metaDataInfos.put(cacheKeyTransform(metaData), metaData);
         return metaData;
+    }
+
+    private String cacheKeyTransform(MetaData metaData) {
+        return String.format("%s:%s:%s", metaData.getInterfaceName(), metaData.getVersion(), metaData.getGroup());
     }
 }

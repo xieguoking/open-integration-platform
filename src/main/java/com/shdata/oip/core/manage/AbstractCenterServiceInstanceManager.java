@@ -20,7 +20,7 @@ import java.util.concurrent.TimeUnit;
 @Slf4j
 public abstract class AbstractCenterServiceInstanceManager implements ServiceInstanceManager {
 
-    private ServiceInstanceStorage serviceInstanceStorage;
+    protected ServiceInstanceStorage serviceInstanceStorage;
 
     private ScheduledExecutorService refreshServerListExecutor;
 
@@ -71,7 +71,7 @@ public abstract class AbstractCenterServiceInstanceManager implements ServiceIns
 
     @Override
     public List<ServiceInstance> listServiceInstance(String serviceId) {
-        List<ServiceInstance> serviceInstanceList = this.serviceInstanceStorage.getMetaDataByServiceId(serviceId);
+        List<ServiceInstance> serviceInstanceList = this.serviceInstanceStorage.listServiceInstance(serviceId);
         if (CollUtil.isNotEmpty(serviceInstanceList)) {
             return serviceInstanceList;
         }

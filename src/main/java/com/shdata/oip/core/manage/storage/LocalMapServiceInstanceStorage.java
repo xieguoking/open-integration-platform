@@ -10,7 +10,6 @@ import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
 
 /**
  * @author wangwj
@@ -24,7 +23,6 @@ public class LocalMapServiceInstanceStorage implements ServiceInstanceStorage {
 
     private final LoadingCache<String, List<ServiceInstance>> serviceInfos = CacheBuilder.newBuilder()
             .maximumSize(1000)
-            .expireAfterAccess(60L, TimeUnit.MINUTES)
             .build(new CacheLoader<String, List<ServiceInstance>>() {
                 @Override
                 @Nonnull
@@ -41,7 +39,7 @@ public class LocalMapServiceInstanceStorage implements ServiceInstanceStorage {
 
 
     @Override
-    public List<ServiceInstance> getMetaDataByServiceId(String serviceId) {
+    public List<ServiceInstance> listServiceInstance(String serviceId) {
         try {
             return serviceInfos.get(serviceId);
         } catch (ExecutionException e) {
@@ -50,6 +48,10 @@ public class LocalMapServiceInstanceStorage implements ServiceInstanceStorage {
         return new ArrayList<>();
     }
 
+    @Override
+    public void removeServiceInstance(String serviceId) {
+        this.serviceInfos.invalidate(serviceId);
+    }
 
     @Override
     public void putServiceInstance(String serviceId, List<ServiceInstance> serviceInstances) {

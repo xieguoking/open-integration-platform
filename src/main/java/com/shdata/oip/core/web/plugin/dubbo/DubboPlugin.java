@@ -4,13 +4,13 @@ import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONUtil;
 import com.shdata.oip.core.common.OipConstants;
 import com.shdata.oip.core.dubbo.DubboMetaDataManager;
+import com.shdata.oip.core.dubbo.po.MetaData;
 import com.shdata.oip.core.web.plugin.OspPlugin;
 import com.shdata.oip.core.web.plugin.OspPluginChain;
 import com.shdata.oip.core.web.plugin.base.BodyParamUtils;
 import com.shdata.oip.core.web.plugin.base.OspConstants;
 import com.shdata.oip.core.web.plugin.base.PluginEnum;
 import com.shdata.oip.core.web.plugin.dubbo.cache.DubboConfigCache;
-import com.shdata.oip.core.dubbo.po.MetaData;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
@@ -72,9 +72,8 @@ public class DubboPlugin implements OspPlugin {
         String versionName = paris.get(OspConstants.VERSION_KEY);
         String interfaceMergerKey = String.format("%s:%s:%s", interfaceName, versionName, groupName);
 
-        //获取元数据：最最最最最最需要优化的一个点
+        //泛化处理
         MetaData metaData = dubboMetaDataManager.getMetaData(interfaceMergerKey);
-
         ReferenceConfig<GenericService> reference = DubboConfigCache.getInstance().get(interfaceMergerKey);
         if (Objects.isNull(reference) || StringUtils.isEmpty(reference.getInterface())) {
             DubboConfigCache.getInstance().invalidate(interfaceMergerKey);
