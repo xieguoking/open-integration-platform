@@ -85,6 +85,7 @@ public class DubboPlugin implements OspPlugin {
         if (StrUtil.isBlank(parameterTypes) || ParamCheckUtils.dubboBodyIsEmpty(body)) {
             pair = new ImmutablePair<>(new String[]{}, new Object[]{});
         } else {
+            //TODO 这个处理逻辑花了6-25ms 需要优化
             pair = BodyParamUtils.buildParameters(body, parameterTypes);
         }
 
