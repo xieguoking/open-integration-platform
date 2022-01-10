@@ -33,8 +33,8 @@ public class VirtualServiceRegistryServiceImpl extends ServiceImpl<VirtualServic
         if (Objects.isNull(virtualServiceRegistry)) {
             virtualServiceRegistry = new VirtualServiceRegistry();
         }
-
-        virtualServiceRegistry.setServiceName(virtualService.getService());
+        virtualServiceRegistry.setServiceID(virtualService.getService());
+        virtualServiceRegistry.setServiceName(virtualService.getServiceName());
         virtualServiceRegistry.setServiceType(virtualService.getMetadata().get(OipConstants.KEY_SERVICE_TYPE));
         virtualServiceRegistry.setIp(virtualService.getIp());
         virtualServiceRegistry.setPort(virtualService.getPort());
