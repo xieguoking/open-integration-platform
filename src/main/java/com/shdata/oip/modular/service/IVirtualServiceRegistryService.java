@@ -16,8 +16,16 @@ public interface IVirtualServiceRegistryService extends IService<VirtualServiceR
 
     /**
      * 虚拟服务上线
-     *
-     * @param virtualService
      */
-    void VirtualServiceUp(VirtualService virtualService);
+    void virtualServiceUp(VirtualService virtualService);
+
+    /**
+     * 虚拟服务下线
+     */
+    void virtualServiceDown(VirtualService virtualService);
+
+    /**
+     * 虚拟服务下线
+     */
+    void virtualServiceDown(String serviceId);
 }

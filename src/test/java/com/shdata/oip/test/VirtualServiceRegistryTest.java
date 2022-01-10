@@ -10,8 +10,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import java.util.concurrent.CountDownLatch;
-
 /**
  * @author wangwj
  * @version 1.0
@@ -31,7 +29,7 @@ public class VirtualServiceRegistryTest {
     @Test
     public void shenYnNacosRegistry() throws InterruptedException {
         ServiceConfigDTO serviceConfigDTO = new ServiceConfigDTO();
-        serviceConfigDTO.setPackagePrefix("com.dave");
+        serviceConfigDTO.setPackagePrefix("com.dave"); //必填，写了逻辑会读取这个开头的数据
         serviceConfigDTO.setServiceType("dubbo");
         serviceConfigDTO.setServiceName("万达金保二期");
         serviceConfigDTO.setServiceId("dubbo-service");
@@ -39,10 +37,6 @@ public class VirtualServiceRegistryTest {
         serviceConfigDTO.setTransformStrategy("default");
         serviceConfigDTO.setOspIp("127.0.0.1");
         serviceConfigDTO.setOspPort(9001);
-
         registryController.serviceConfig(serviceConfigDTO);
-        CountDownLatch countDownLatch = new CountDownLatch(1);
-        //阻塞主线程，手动关闭，自动关闭心跳也就结束无法直观的看到是否注册成功
-        countDownLatch.await();
     }
 }

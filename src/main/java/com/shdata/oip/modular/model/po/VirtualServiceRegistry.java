@@ -85,7 +85,7 @@ public class VirtualServiceRegistry {
      * 注册状态 0：失败 1：成功 2：未知
      */
     @TableField("STATUS")
-    private String status;
+    private Integer status;
 
 
     public static final String ID = "ID";

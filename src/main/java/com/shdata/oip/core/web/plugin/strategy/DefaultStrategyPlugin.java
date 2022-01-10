@@ -54,7 +54,9 @@ public class DefaultStrategyPlugin implements OspPlugin {
         ospPluginChain.execute(httpServletRequest, httpServletResponse);
     }
 
-
+    /**
+     * TODO 优化
+     */
     private Map<String, String> resolveUrlToReferenceRule(final String url) {
         String removePrefixString = StrUtil.removePrefix(url, "/");
         String[] removePrefixStringArr = removePrefixString.split("\\/");

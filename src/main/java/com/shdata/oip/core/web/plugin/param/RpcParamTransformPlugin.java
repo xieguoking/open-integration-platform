@@ -2,7 +2,6 @@ package com.shdata.oip.core.web.plugin.param;
 
 import cn.hutool.json.JSONUtil;
 import com.shdata.oip.core.common.OipConstants;
-import com.shdata.oip.core.vs.DefaultVirtualService;
 import com.shdata.oip.core.web.plugin.OspPlugin;
 import com.shdata.oip.core.web.plugin.OspPluginChain;
 import com.shdata.oip.core.web.plugin.base.OspConstants;
@@ -43,6 +42,9 @@ public class RpcParamTransformPlugin implements OspPlugin {
         return skip(httpServletRequest, OipConstants.KEY_SERVICE_TYPE, PluginEnum.DUBBO);
     }
 
+    /**
+     * 考虑编码问题
+     */
     @Override
     public void execute(final HttpServletRequest httpServletRequest, final HttpServletResponse httpServletResponse, final OspPluginChain chain) throws IOException {
         String mediaType = httpServletRequest.getHeader("Content-Type");

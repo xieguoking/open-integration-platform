@@ -2,6 +2,7 @@ package com.shdata.oip;
 
 import com.alibaba.cloud.nacos.NacosDiscoveryProperties;
 import com.shdata.oip.core.vs.ShenYuNacosServiceRegistry;
+import com.shdata.oip.modular.handler.VirtualMetaDataHandler;
 import com.shdata.oip.modular.handler.VirtualServiceRegistryHandler;
 import org.apache.shenyu.register.common.config.ShenyuRegisterCenterConfig;
 import org.springframework.boot.SpringApplication;
@@ -31,10 +32,10 @@ public class OpenSupportPlatform {
         return new VirtualServiceRegistryHandler();
     }
 
-//    @Bean
-//    public VirtualServiceListHandler virtualServiceListHandler() {
-//        return new VirtualServiceListHandler();
-//    }
+    @Bean
+    public VirtualMetaDataHandler virtualMetaDataHandler() {
+        return new VirtualMetaDataHandler();
+    }
 
 
     @Bean

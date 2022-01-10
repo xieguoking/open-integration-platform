@@ -64,7 +64,6 @@ public class RegistryController {
         virtualService.setServiceType(serviceConfigDTO.getServiceType());
         virtualService.setTransformStrategy(serviceConfigDTO.getTransformStrategy());
         virtualService.setServiceDesc(serviceConfigDTO.getServiceDesc());
-        virtualServiceRegistry.register(virtualService);
         iServiceConfigService.analysisIntoDb(virtualService);
         return serviceConfigDTO;
     }

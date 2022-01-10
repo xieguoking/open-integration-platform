@@ -3,6 +3,7 @@ package com.shdata.oip.modular.service.impl;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.shdata.oip.core.common.OipConstants;
 import com.shdata.oip.core.spi.VirtualService;
@@ -27,11 +28,10 @@ public class VirtualServiceRegistryServiceImpl extends ServiceImpl<VirtualServic
 
 
     @Override
-    public void VirtualServiceUp(VirtualService virtualService) {
+    public void virtualServiceUp(VirtualService virtualService) {
         VirtualServiceRegistry virtualServiceRegistry = this.getOne(new QueryWrapper<VirtualServiceRegistry>().lambda().eq(VirtualServiceRegistry::getServiceID, virtualService.getService()));
         if (Objects.isNull(virtualServiceRegistry)) {
             virtualServiceRegistry = new VirtualServiceRegistry();
-
         }
 
         virtualServiceRegistry.setServiceName(virtualService.getService());
@@ -41,6 +41,21 @@ public class VirtualServiceRegistryServiceImpl extends ServiceImpl<VirtualServic
         virtualServiceRegistry.setMetadata(JSONUtil.toJsonStr(virtualService.getMetadata()));
         virtualServiceRegistry.setRegTime(DateUtil.parseDateTime(virtualService.getMetadata().get(OipConstants.KEY_SERVICE_REG_TIME)));
         virtualServiceRegistry.setLastTime(new Date());
+        virtualServiceRegistry.setStatus(OipConstants.REGISTRY_STATUS_SUCCESS);
         this.saveOrUpdate(virtualServiceRegistry);
+    }
+
+
+    @Override
+    public void virtualServiceDown(VirtualService virtualService) {
+        virtualServiceDown(virtualService.getService());
+    }
+
+    @Override
+    public void virtualServiceDown(String serviceId) {
+        this.update(new UpdateWrapper<VirtualServiceRegistry>().lambda()
+                .set(VirtualServiceRegistry::getLastTime, new Date())
+                .set(VirtualServiceRegistry::getStatus, OipConstants.REGISTRY_STATUS_SUCCESS)
+                .eq(VirtualServiceRegistry::getServiceID, serviceId));
     }
 }
