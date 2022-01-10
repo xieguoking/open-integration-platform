@@ -1,6 +1,7 @@
 package com.shdata.oip.modular.handler;
 
 import cn.hutool.core.collection.CollUtil;
+import com.shdata.oip.core.common.OipConstants;
 import com.shdata.oip.core.spi.VirtualService;
 import com.shdata.oip.core.spi.VirtualServiceRegistry;
 import com.shdata.oip.modular.service.IServiceConfigService;
@@ -68,6 +69,7 @@ public class VirtualServiceRegistryHandler implements ApplicationListener<Applic
                 iVirtualServiceRegistryService.virtualServiceUp(virtualServices.get(i));
             } catch (Exception e) {
                 log.error("{},注册失败", virtualServices.get(i).getService(), e);
+                iVirtualServiceRegistryService.virtualServiceStatus(virtualServices.get(i).getService(), OipConstants.REGISTRY_STATUS_ERROR);
             }
         }
     }

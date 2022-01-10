@@ -48,14 +48,14 @@ public class VirtualServiceRegistryServiceImpl extends ServiceImpl<VirtualServic
 
     @Override
     public void virtualServiceDown(VirtualService virtualService) {
-        virtualServiceDown(virtualService.getService());
+        virtualServiceStatus(virtualService.getService(), OipConstants.REGISTRY_STATUS_SUCCESS);
     }
 
     @Override
-    public void virtualServiceDown(String serviceId) {
+    public void virtualServiceStatus(String serviceId, Integer status) {
         this.update(new UpdateWrapper<VirtualServiceRegistry>().lambda()
                 .set(VirtualServiceRegistry::getLastTime, new Date())
-                .set(VirtualServiceRegistry::getStatus, OipConstants.REGISTRY_STATUS_SUCCESS)
+                .set(VirtualServiceRegistry::getStatus, status)
                 .eq(VirtualServiceRegistry::getServiceID, serviceId));
     }
 }
