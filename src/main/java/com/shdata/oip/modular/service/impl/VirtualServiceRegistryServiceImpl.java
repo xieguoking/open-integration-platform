@@ -29,6 +29,7 @@ public class VirtualServiceRegistryServiceImpl extends ServiceImpl<VirtualServic
 
     @Override
     public void virtualServiceUp(VirtualService virtualService) {
+        //feat do distributed lock ,protection only one build
         VirtualServiceRegistry virtualServiceRegistry = this.getOne(new QueryWrapper<VirtualServiceRegistry>().lambda().eq(VirtualServiceRegistry::getServiceID, virtualService.getService()));
         if (Objects.isNull(virtualServiceRegistry)) {
             virtualServiceRegistry = new VirtualServiceRegistry();
@@ -48,7 +49,7 @@ public class VirtualServiceRegistryServiceImpl extends ServiceImpl<VirtualServic
 
     @Override
     public void virtualServiceDown(VirtualService virtualService) {
-        virtualServiceStatus(virtualService.getService(), OipConstants.REGISTRY_STATUS_SUCCESS);
+        virtualServiceStatus(virtualService.getService(), OipConstants.REGISTRY_STATUS_DOWN);
     }
 
     @Override

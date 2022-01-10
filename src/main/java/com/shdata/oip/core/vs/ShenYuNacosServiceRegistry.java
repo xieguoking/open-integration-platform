@@ -17,6 +17,10 @@ import org.springframework.cloud.client.serviceregistry.ServiceRegistry;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 
+import java.util.Map;
+import java.util.Objects;
+import java.util.concurrent.ConcurrentHashMap;
+
 /**
  * @author wangwj
  * @version 1.0
@@ -33,6 +37,10 @@ public class ShenYuNacosServiceRegistry implements VirtualServiceRegistry, Appli
     private NacosDiscoveryProperties nacosDiscoveryProperties;
     private ApplicationContext context;
     private ShenyuRegisterCenterConfig shenyuRegisterCenterConfig;
+
+    private Map<String, NacosClientRegisterRepository> alreadyRegisterShenYu = new ConcurrentHashMap<>();
+    private Map<String, NacosRegistration> alreadyRegisterNacos = new ConcurrentHashMap<>();
+
 
     public ShenYuNacosServiceRegistry(ShenyuRegisterCenterConfig shenyuRegisterCenterConfig) {
         this.shenyuRegisterCenterConfig = shenyuRegisterCenterConfig;
@@ -71,14 +79,13 @@ public class ShenYuNacosServiceRegistry implements VirtualServiceRegistry, Appli
         nacosClientRegisterRepository.persistURI(urlRegisterDTO);
         //注册元数据，对应的是nacos 配置文件 和 shenyu admin选择器的规则
         nacosClientRegisterRepository.persistInterface(metaDataRegisterDTO);
+
+        alreadyRegisterShenYu.put(service.getService(), nacosClientRegisterRepository);
         //nacos 注册中心注册
         this.nacosRegistry(service);
     }
 
-    /**
-     * 这里nacosClientRegisterRepository.persistURI，它只注册一次，又不想引用 NacosVirtualServiceRegistry.class
-     * 就再写一次吧
-     */
+
     private void nacosRegistry(VirtualService service) {
 
         NacosDiscoveryProperties nacosDiscoveryProperties = new NacosDiscoveryProperties();
@@ -108,11 +115,26 @@ public class ShenYuNacosServiceRegistry implements VirtualServiceRegistry, Appli
         NacosRegistration nacosRegistration = new NacosRegistration(nacosDiscoveryProperties, context);
 
         serviceRegistry.register(nacosRegistration);
+        alreadyRegisterNacos.put(service.getService(), nacosRegistration);
+    }
+
+    @Override
+    public void deRegister(String serviceId) {
+        NacosRegistration nacosRegistration = alreadyRegisterNacos.get(serviceId);
+        //deregister nacos
+        if (Objects.nonNull(nacosRegistration)) {
+            serviceRegistry.deregister(nacosRegistration);
+        }
+
+        //deregister shenyu
+        NacosClientRegisterRepository nacosClientRegisterRepository = alreadyRegisterShenYu.get(serviceId);
+        if (Objects.nonNull(nacosClientRegisterRepository)) {
+            nacosClientRegisterRepository.close();
+        }
     }
 
     @Override
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
         this.context = applicationContext;
     }
-
 }

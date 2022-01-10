@@ -16,4 +16,10 @@ public interface VirtualServiceRegistry {
      * @param service
      */
     void register(VirtualService service);
+
+
+    /**
+     * 服务下线
+     */
+    void deRegister(String serviceId);
 }

@@ -1,21 +1,18 @@
 package com.shdata.oip.modular.api;
 
-import cn.hutool.core.date.DateUtil;
-import com.shdata.oip.core.common.OipConstants;
 import com.shdata.oip.core.spi.VirtualServiceRegistry;
 import com.shdata.oip.core.vs.DubboVirtualService;
 import com.shdata.oip.modular.model.dto.ServiceConfigDTO;
 import com.shdata.oip.modular.service.IServiceConfigService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
 import lombok.RequiredArgsConstructor;
-import org.springframework.cloud.client.discovery.DiscoveryClient;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.Valid;
-import java.util.Date;
-import java.util.List;
 
 /**
  * @author xieguojun
@@ -30,28 +27,35 @@ import java.util.List;
 public class RegistryController {
 
 
-    private final DiscoveryClient discoveryClient;
     private final VirtualServiceRegistry virtualServiceRegistry;
     private final IServiceConfigService iServiceConfigService;
 
+    /**
+     * api  list
+     *
+     * 服务配置添加
+     * -----------
+     * 服务配置删除
+     * ---------- 下线虚服务
+     * 服务配置修改
+     * ---------- 重新注册虚服务
+     *
+     * 发布生效
+     * 发布关闭（已注册服务，需要手动下线）
+     *
+     * 服务下线
+     * 服务上线(参数 service Id,调用注册逻辑)
+     *
+     * 接口信息api
+     * ----------name
+     * ----------uri
+     *
+     */
 
-    @GetMapping("app/{name}/{ip}")
-    @ApiOperation("服务注册")
-    public Object registry(@ApiParam("服务名") @PathVariable String name, @ApiParam("IP") @PathVariable(required = false, value = "127.0.0.1") String ip) {
-        DubboVirtualService virtualService = new DubboVirtualService();
-        virtualService.setPackagePrefix("com.shdata");
-        virtualService.setService(name);
-        virtualService.setServiceName(name);
-        virtualService.setIp(ip);
-        virtualService.setServiceType("dubbo");
 
-        virtualServiceRegistry.register(virtualService);
-
-        List<String> services = discoveryClient.getServices();
-        return services;
-    }
-
-
+    /**
+     * 服务配置添加
+     */
     @PostMapping("serviceConfig")
     @ApiOperation("服务注册")
     public Object serviceConfig(@Valid ServiceConfigDTO serviceConfigDTO) {
@@ -66,6 +70,31 @@ public class RegistryController {
         virtualService.setServiceDesc(serviceConfigDTO.getServiceDesc());
         iServiceConfigService.analysisIntoDb(virtualService);
         return serviceConfigDTO;
+    }
+
+    /**
+     *
+     */
+
+
+    /**
+     * 服务下线：实时
+     */
+    @PostMapping("serviceDown")
+    @ApiOperation("服务下线")
+    public void deRegistry(@RequestParam String serviceId) {
+        virtualServiceRegistry.deRegister(serviceId);
+    }
+
+
+    /**
+     * 服务发布上线:30 - 60 秒延迟
+     */
+    @PostMapping("serviceUp")
+    @ApiOperation("服务上线")
+    public void registry(@RequestParam String serviceId) {
+        //
+//        iServiceConfigService
     }
 
 }

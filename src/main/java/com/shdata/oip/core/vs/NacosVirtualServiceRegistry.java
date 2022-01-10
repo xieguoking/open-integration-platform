@@ -12,6 +12,10 @@ import org.springframework.cloud.client.serviceregistry.ServiceRegistry;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 
+import java.util.Map;
+import java.util.Objects;
+import java.util.concurrent.ConcurrentHashMap;
+
 /**
  * Nacos虚拟服务注册表
  *
@@ -28,6 +32,7 @@ public class NacosVirtualServiceRegistry implements VirtualServiceRegistry, Appl
     @Autowired
     private NacosDiscoveryProperties nacosDiscoveryProperties;
 
+    private Map<String, NacosRegistration> alreadyRegisterNacos = new ConcurrentHashMap<>();
     private ApplicationContext context;
 
     @Override
@@ -59,6 +64,18 @@ public class NacosVirtualServiceRegistry implements VirtualServiceRegistry, Appl
         NacosRegistration nacosRegistration = new NacosRegistration(nacosDiscoveryProperties, context);
 
         serviceRegistry.register(nacosRegistration);
+        alreadyRegisterNacos.put(service.getService(), nacosRegistration);
+    }
+
+
+    @Override
+    public void deRegister(String serviceId) {
+        NacosRegistration nacosRegistration = alreadyRegisterNacos.get(serviceId);
+        //deregister nacos
+        if (Objects.nonNull(nacosRegistration)) {
+            serviceRegistry.deregister(nacosRegistration);
+        }
+
     }
 
     @Override

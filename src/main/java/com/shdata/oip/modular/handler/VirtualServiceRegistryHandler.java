@@ -2,16 +2,15 @@ package com.shdata.oip.modular.handler;
 
 import cn.hutool.core.collection.CollUtil;
 import com.shdata.oip.core.common.OipConstants;
+import com.shdata.oip.core.manage.ServiceInstanceManager;
 import com.shdata.oip.core.spi.VirtualService;
 import com.shdata.oip.core.spi.VirtualServiceRegistry;
 import com.shdata.oip.modular.service.IServiceConfigService;
 import com.shdata.oip.modular.service.IVirtualServiceRegistryService;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.context.event.ApplicationReadyEvent;
-import org.springframework.context.ApplicationListener;
 
+import javax.annotation.PostConstruct;
 import java.util.List;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
@@ -21,10 +20,10 @@ import java.util.concurrent.TimeUnit;
  * @author wangwj
  * @version 1.0
  * @date 2022/1/6
- * TODO 检查注册失败 继续注册
+ * 检查注册中心是否注册下线，失败，则继续注册
  */
 @Slf4j
-public class VirtualServiceRegistryHandler implements ApplicationListener<ApplicationReadyEvent>, DisposableBean {
+public class VirtualServiceRegistryHandler {
 
     @Autowired
     private VirtualServiceRegistry virtualServiceRegistry;
@@ -32,13 +31,17 @@ public class VirtualServiceRegistryHandler implements ApplicationListener<Applic
     private IServiceConfigService iServiceConfigService;
     @Autowired
     private IVirtualServiceRegistryService iVirtualServiceRegistryService;
+    @Autowired
+    private ServiceInstanceManager serviceInstanceManager;
+
     private ScheduledExecutorService refreshServerListExecutor;
-    private final long refreshServerListInternal = TimeUnit.SECONDS.toMillis(60);
+    private final long refreshServerListInternal = TimeUnit.SECONDS.toMillis(30);
     private long lastServerListRefreshTime = 0L;
 
+    @PostConstruct
     public void init() {
         refreshServerListExecutor = new ScheduledThreadPoolExecutor(1);
-        refreshServerListExecutor.scheduleWithFixedDelay(() -> refreshServerListIfNeed(), 0, refreshServerListInternal, TimeUnit.MILLISECONDS);
+        refreshServerListExecutor.scheduleWithFixedDelay(() -> refreshServerListIfNeed(), 200, refreshServerListInternal, TimeUnit.MILLISECONDS);
     }
 
 
@@ -48,6 +51,7 @@ public class VirtualServiceRegistryHandler implements ApplicationListener<Applic
             if (System.currentTimeMillis() - lastServerListRefreshTime < refreshServerListInternal) {
                 return;
             }
+            initVirtual();
             lastServerListRefreshTime = System.currentTimeMillis();
         } catch (Throwable e) {
             log.warn("failed to update server list", e);
@@ -63,24 +67,23 @@ public class VirtualServiceRegistryHandler implements ApplicationListener<Applic
         if (CollUtil.isEmpty(virtualServices)) {
             return;
         }
+
         for (int i = 0; i < virtualServices.size(); i++) {
+            VirtualService virtualService = virtualServices.get(i);
+            //is already ,do not repeat register
+            if (serviceInstanceManager.allService().contains(virtualService.getService())) {
+                log.debug("注册中心，已注册该【{}】虚服务,执行跳过！", virtualService.getService());
+                continue;
+            }
+
             try {
-                virtualServiceRegistry.register(virtualServices.get(i));
-                iVirtualServiceRegistryService.virtualServiceUp(virtualServices.get(i));
+                virtualServiceRegistry.register(virtualService);
+                iVirtualServiceRegistryService.virtualServiceUp(virtualService);
+                log.info("registry center 【{}】vs service success！", virtualService.getService());
             } catch (Exception e) {
-                log.error("{},注册失败", virtualServices.get(i).getService(), e);
-                iVirtualServiceRegistryService.virtualServiceStatus(virtualServices.get(i).getService(), OipConstants.REGISTRY_STATUS_ERROR);
+                log.error("{},注册失败", virtualService.getService(), e);
+                iVirtualServiceRegistryService.virtualServiceStatus(virtualService.getService(), OipConstants.REGISTRY_STATUS_ERROR);
             }
         }
-    }
-
-    @Override
-    public void onApplicationEvent(ApplicationReadyEvent applicationReadyEvent) {
-        initVirtual();
-    }
-
-    @Override
-    public void destroy() throws Exception {
-        //下线
     }
 }

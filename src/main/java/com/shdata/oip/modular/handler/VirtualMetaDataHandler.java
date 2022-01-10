@@ -20,10 +20,9 @@ import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.dubbo.common.constants.CommonConstants;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.cloud.client.ServiceInstance;
-import org.springframework.context.ApplicationListener;
 
+import javax.annotation.PostConstruct;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -39,7 +38,7 @@ import java.util.stream.Collectors;
  * manage
  */
 @Slf4j
-public class VirtualMetaDataHandler implements ApplicationListener<ApplicationReadyEvent> {
+public class VirtualMetaDataHandler {
 
     @Autowired
     private IServiceConfigService iServiceConfigService;
@@ -54,11 +53,13 @@ public class VirtualMetaDataHandler implements ApplicationListener<ApplicationRe
 
     private ScheduledExecutorService refreshMetaDataExecutor;
     private final long refreshMetaDataInternal = TimeUnit.SECONDS.toMillis(60);
+    private final long initialDelay = TimeUnit.SECONDS.toMillis(60);
     private long lastMetaDataRefreshTime = 0L;
 
+    @PostConstruct
     public void init() {
         refreshMetaDataExecutor = new ScheduledThreadPoolExecutor(1);
-        refreshMetaDataExecutor.scheduleWithFixedDelay(() -> refreshMetaDataIfNeed(), 60, refreshMetaDataInternal, TimeUnit.MILLISECONDS);
+        refreshMetaDataExecutor.scheduleWithFixedDelay(() -> refreshMetaDataIfNeed(), initialDelay, refreshMetaDataInternal, TimeUnit.MILLISECONDS);
     }
 
     private void refreshMetaDataIfNeed() {
@@ -169,11 +170,6 @@ public class VirtualMetaDataHandler implements ApplicationListener<ApplicationRe
         iApisArgsService.saveBatch(intoDbApiArgs);
     }
 
-
-    @Override
-    public void onApplicationEvent(ApplicationReadyEvent applicationReadyEvent) {
-        this.init();
-    }
 
     @Setter
     @Getter
